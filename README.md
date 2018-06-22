@@ -5,7 +5,7 @@ to the Travelling Salesman Problem (TSP). As an example, the code in `example.py
 
 and converts it to the following picture
 
-![Approximate Solution to TSP for Tiger Head](docs\finalCycle.png)
+![Approximate Solution to TSP for Tiger Head](docs/finalCycle.png)
 
 The process to make the final picture are as follows:
 1. The vertices for the TSP are created by dithering the input image and using the result black pixels as vertices.
