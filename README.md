@@ -39,3 +39,5 @@ initial greedy guess.
 Functions to make plotting results convenient.
 
 # Description of Library's Process
+
+For a discussion of how the process works, please see [this blog post by Matthew McGonagle](https://matthewmcgonagle.github.io/blog/2018/06/09/TSPArtModifiedAnnealing).
