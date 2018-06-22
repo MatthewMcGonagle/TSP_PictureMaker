@@ -43,6 +43,11 @@ def getPixels(image, ds = 1):
 
 def main():
 
+    # Set the figure size for graphs of cycles.
+
+    cycleFigSize = (8, 8)
+    finalFigSize = (10, 10)
+
     # Open the image.
 
     image = Image.open('tigerHeadResize.png').convert('L')
@@ -95,8 +100,9 @@ def main():
     # Plot the intial cycle.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Greedy Guess Path', doScatter = False)
-    #savePNG('vonNeumannInitial.png')
+    plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
+    plt.tight_layout()
+    savePNG('docs\\greedyGuess.png')
     plt.show()
     
     energies = doAnnealingJobs(annealingSteps, nJobs)
@@ -106,14 +112,16 @@ def main():
     # Plot the energies of the annealing process over time.
     
     plotEnergies(energies, 'Energies for Size Scale Annealing')
-    #savePNG('vonNeumannEnergies.png')
+    # If you wish to save a copy of the graph, then use the following line:
+    # savePNG('docs\\sizeScaleEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False)
-    #savePNG('vonNeumannFinal.png')
+    plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
+    plt.tight_layout()
+    savePNG('docs\\afterSizeAnnealing.png')
     plt.show()   
 
     vertices = cycle[:-1]
@@ -144,13 +152,6 @@ def main():
     annealingSteps = NeighborsAnnealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
     print('Initial Configuration:\n', annealingSteps.getInfoString())
     
-    # Plot the intial cycle.
-    
-    # cycle = annealingSteps.getCycle()
-    # plotCycle(cycle, 'Initial Path for Inverted vonNeuman.png', doScatter = False)
-    # #savePNG('vonNeumannInitial.png')
-    # plt.show()
-    
     # Now run the annealing steps for the vonNeumann.png example.
    
     energies = doAnnealingJobs(annealingSteps, nJobs) 
@@ -159,14 +160,16 @@ def main():
     # Plot the energies of the annealing process over time.
     
     plotEnergies(energies, 'Energies for Neighbors Annealing')
-    #savePNG('vonNeumannEnergies.png')
+    # If you wish to save a copy of this graph, then use the following line:
+    # savePNG('docs\\nbrsEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False)
-    #savePNG('vonNeumannFinal.png')
+    plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
+    plt.tight_layout()
+    savePNG('docs\\finalCycle.png')
     plt.show()   
 
 ##########################

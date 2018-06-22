@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+import io
 
-def plotCycle(cycle, title, doScatter = True):
+def plotCycle(cycle, title, doScatter = True, figsize = (5, 5)):
     ''' 
     Plot a cycle through all of the vertices. Can optionally do a scatter plot of all the vertices.
 
@@ -17,9 +19,12 @@ def plotCycle(cycle, title, doScatter = True):
     doScatter : Boolean
         Whether to do a scatter plot of the different vertices. Default is True, i.e. do the
         scatter plot.
+
+    figsize : Pair of Int
+        The size of the figure to use for drawing the cycle. Default is (5, 5).
     '''
 
-    plt.figure(figsize = (5, 5))
+    plt.figure(figsize = figsize) 
     plt.plot(cycle[:, 0], cycle[:, 1])
     if doScatter:
         plt.scatter(cycle[:, 0], cycle[:, 1], color = 'red')
@@ -46,4 +51,19 @@ def plotEnergies(energies, title):
     ax.set_xlabel('Nth Run of Annealing')
     ax.set_ylabel('Energy')
 
+def savePNG(filename):
+    '''
+    Save the current pyplot figure as a png file, but first reduce the color palette to reduce the file size.
 
+    Parameters
+    ----------
+    filename : String
+        The name of the file to save to.
+    '''
+
+    imageIO = io.BytesIO()
+    plt.savefig(imageIO, format = 'png')
+    imageIO.seek(0)
+    image = Image.open(imageIO)
+    image = image.convert('P', palette = Image.WEB)
+    image.save(filename , format = 'PNG')
