@@ -1,8 +1,6 @@
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
-import matplotlib.pyplot as plt
 
-class AnnealerTSPSizeScale:
+class Annealer:
     '''
     An iterator for performing annealing based on a size scale. The annealing is done on a pool of vertices
     that are on an edge of the cycle that is at least as long as the current size scale; so one should think

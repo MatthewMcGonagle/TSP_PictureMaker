@@ -1,11 +1,8 @@
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from PIL import Image
-from annealers import *
-from dithering import *
-from processVertices import *
-from resultPlotting import *
+
+import tspDraw
 
 def getPixels(image, ds = 1):
     '''
@@ -57,7 +54,7 @@ def main():
 
     # Get the dithered image.
 
-    ditheringMaker = DitheringMaker()
+    ditheringMaker = tspDraw.dithering.DitheringMaker()
     dithering = ditheringMaker.makeDithering(pixels)
     plt.imshow(dithering, cmap = 'gray')
     plt.show()
@@ -65,10 +62,10 @@ def main():
     # Get the vertices from the dithered image and then
     # do the preprocessing.
     
-    vertices = getVertices(dithering)
+    vertices = tspDraw.dithering.getVertices(dithering)
     print('Num vertices = ', len(vertices))
     print('Preprocessing Vertices')
-    vertices = preprocessVertices(vertices)
+    vertices = tspDraw.processVertices.preprocess(vertices)
     print('Preprocessing Complete')
     plt.scatter(vertices[:, 0], vertices[:, 1])
     plt.show()
@@ -94,34 +91,34 @@ def main():
     
     # Set up our annealing steps iterator.
     
-    annealingSteps = AnnealerTSPSizeScale(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
+    annealingSteps = tspDraw.sizeScale.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
     print('Initial Configuration:\n', annealingSteps.getInfoString())
     
     # Plot the intial cycle.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
+    tspDraw.graphics.plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
-    savePNG('docs\\greedyGuess.png')
+    tspDraw.graphics.savePNG('docs\\greedyGuess.png')
     plt.show()
     
-    energies = doAnnealingJobs(annealingSteps, nJobs)
+    energies = tspDraw.jobs.doAnnealing(annealingSteps, nJobs)
  
     print('Finished running annealing jobs') 
     
     # Plot the energies of the annealing process over time.
     
-    plotEnergies(energies, 'Energies for Size Scale Annealing')
+    tspDraw.graphics.plotEnergies(energies, 'Energies for Size Scale Annealing')
     # If you wish to save a copy of the graph, then use the following line:
-    # savePNG('docs\\sizeScaleEnergies.png')
+    # tspDraw.graphics.savePNG('docs\\sizeScaleEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
+    tspDraw.graphics.plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
-    savePNG('docs\\afterSizeAnnealing.png')
+    tspDraw.graphics.savePNG('docs\\afterSizeAnnealing.png')
     plt.show()   
 
     vertices = cycle[:-1]
@@ -149,27 +146,27 @@ def main():
     
     # Set up our annealing steps iterator.
     
-    annealingSteps = NeighborsAnnealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
+    annealingSteps = tspDraw.neighbors.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
     print('Initial Configuration:\n', annealingSteps.getInfoString())
     
     # Now run the annealing steps for the vonNeumann.png example.
    
-    energies = doAnnealingJobs(annealingSteps, nJobs) 
+    energies = tspDraw.jobs.doAnnealing(annealingSteps, nJobs) 
     print('Finished running annealing jobs') 
     
     # Plot the energies of the annealing process over time.
     
-    plotEnergies(energies, 'Energies for Neighbors Annealing')
+    tspDraw.graphics.plotEnergies(energies, 'Energies for Neighbors Annealing')
     # If you wish to save a copy of this graph, then use the following line:
-    # savePNG('docs\\nbrsEnergies.png')
+    # tspDraw.graphics.savePNG('docs\\nbrsEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.getCycle()
-    plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
+    tspDraw.graphics.plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
     plt.tight_layout()
-    savePNG('docs\\finalCycle.png')
+    tspDraw.graphics.savePNG('docs\\finalCycle.png')
     plt.show()   
 
 ##########################

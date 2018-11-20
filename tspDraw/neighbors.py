@@ -1,12 +1,11 @@
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-import matplotlib.pyplot as plt
 
 ##########################################
 #### NeighborsAnnealer
 ##########################################
 
-class NeighborsAnnealer:
+class Annealer:
     '''
     Modified simulated annealer that randomly selects a vertex and then randomly selects another vertex from the
     k-nearest neighbors of the first vertex. The point of this annealer is to do annealing when the current

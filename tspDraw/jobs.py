@@ -1,7 +1,9 @@
+import numpy as np
+
 ############################
 #### Helper Functions
 ############################
-def doAnnealingJobs(annealer, nJobs):
+def doAnnealing(annealer, nJobs):
     '''
     Do the annealing jobs (or annealing runs) for a particular annealer. This will perform a
     warm restart of the annealer between each job.

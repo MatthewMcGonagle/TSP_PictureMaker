@@ -327,7 +327,7 @@ class GreedyGuesser3:
 ### Helper Functions
 #############################
 
-def preprocessVertices(vertices):
+def preprocess(vertices):
     '''
     Normalize vertices and make our intial greedy guess as to the solution of the Traveling Salesman Problem.
     If there is an odd number of vertices, then our greedy guess will drop the last vertex.
