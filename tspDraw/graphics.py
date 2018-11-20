@@ -3,6 +3,36 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import io
 
+def getPixels(image, ds = 1):
+    '''
+    Get the pixels as a numpy array from a PIL image.
+    We can take the mean of each ds x ds subsquare as an array element inorder to down-size
+    the size of the image if we want to.
+
+    Parameters
+    ----------
+    image : PIL Image
+        The PIL image to convert.
+
+    ds : Int
+        We take the mean of each ds x ds sub-square for a single element of our array. 
+
+    Returns
+    -------
+    2d Numpy array of floats
+        The converted values of the pixels in the image. We use mean because we
+        possibly took a mean over sub-squares.
+    '''
+
+    imwidth, imheight = image.size
+    pixels = list(image.getdata())
+    pixels = np.array(pixels).reshape((imheight, imwidth))
+    
+    pixels = [[pixels[i:i+ds, j:j+ds].mean() for j in np.arange(0, imwidth, ds)] 
+                for i in np.arange(0, imheight, ds)]
+    pixels = np.array(pixels)
+    return pixels
+ 
 def plotCycle(cycle, title, doScatter = True, figsize = (5, 5)):
     ''' 
     Plot a cycle through all of the vertices. Can optionally do a scatter plot of all the vertices.
