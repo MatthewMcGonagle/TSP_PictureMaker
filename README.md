@@ -14,29 +14,41 @@ The process to make the final picture are as follows:
 size scale.
 4. Further improvements are made by applying another modification of simulated annealing based on nearest neighbors. 
 
-# File Descriptions
-
-## annealers.py
-
-Classes responsible for doing simulated annealing based on size scale and for doing simulated annealing
-based on k-nearest neighbors.
-
-## dithering.py
-
-Class and functions for applying dithering to an image.
+# Example Code
 
 ## example.py
 
 An example of using the functions to convert tigerHeadResize.png into a TSP picture.
 
-## processVertices.py
+# Package Description 
+
+The name of the package is `tspDraw`. It contains the following modules:
+
+## dithering
+
+Class and functions for applying dithering to an image.
+
+## graphics
+
+Functions for plotting results, saving images, and preprocessing of input images.
+
+## jobs
+
+Functions for dealing with running batches of the annealing steps for different types of annealers.
+
+## neighbors
+
+Contains annealer that uses k-nearest neighbors as vertex pool.
+
+## processVertices
 
 Functions for getting the vertices from the dithered image and for preprocessing them, including the
 initial greedy guess. 
 
-## resultPlotting.py
+## sizeScale
 
-Functions to make plotting results convenient.
+Contains annealer that uses a vertex pool based on a lower bound of the distance to the either of
+the vertex's initial neighbors in the initial cycle. 
 
 # Description of Library's Process
 
