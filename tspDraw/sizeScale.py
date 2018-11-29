@@ -1,5 +1,57 @@
 import numpy as np
 
+def guessSettings(vertices, nStepsPerJob, nJobs = 10):
+    '''
+    Vertices should be pre-normalized.
+
+    Estimates are based on assumption that vertices fill in a unit square area uniformly.
+
+    Parameters
+    ----------
+    vertices : Numpy Array of Shape (nPoints, 2)
+        Holds the xy-coordinates of the points on the path.
+
+    nStepsPerJob : Int
+        The number of steps to perform for each job.
+
+    Returns
+    -------
+    settings : Dictionary of other parameters for Annealer().
+    '''
+
+    nVert = len(vertices) 
+    expectedLength = np.sqrt(nVert)
+    distances = np.linalg.norm(vertices[1:] - vertices[:-1], axis = -1)
+    actualLength = distances.sum()
+    segment = actualLength / nVert
+
+    differenceLength = np.abs(expectedLength - actualLength)
+    proportionToMakeHalfChance = 0.001
+    temperature = proportionToMakeHalfChance * actualLength / np.log(2)
+    cooling = np.abs(np.log(actualLength) - np.log(expectedLength))
+    cooling = np.exp(-cooling / nStepsPerJob / nJobs)
+    # temperature = proportionToMakeHalfChance * differenceLength / np.log(2) 
+    temperature = 3 * segment / np.log(2)
+    cooling = np.exp(np.log(1.0/3) / nStepsPerJob / nJobs)
+   
+    # newProportion = proportionToMakeHalfChance * 0.99
+    # cooling = np.exp(np.log(newProportion / proportionToMakeHalfChance) / nStepsPerJob) 
+  
+    initScale = np.percentile(distances, 99.8)
+    finalScale = np.percentile(distances, 99.5) 
+    finalScale = segment / 2 
+    print(nVert)
+    print(initScale, finalScale)
+    sizeCooling = np.exp(np.log(finalScale / initScale) /nStepsPerJob / nJobs)
+
+    settings = {'temperature' : temperature,
+                'tempCool' : cooling,
+                'sizeScale' : initScale,
+                'sizeCool' : sizeCooling
+               } 
+
+    return settings
+
 class Annealer:
     '''
     An iterator for performing annealing based on a size scale. The annealing is done on a pool of vertices
@@ -405,6 +457,7 @@ class Annealer:
         info = 'Energy = ' + str(energy)
         info += '\tnPool = ' + str(self.nPool)
         info += '\tTemperature = ' + str(self.temperature)
+        info += '\t Scale = ' + str(self.sizeScale)
 
         return info
 

@@ -4,3 +4,4 @@ import tspDraw.sizeScale
 import tspDraw.neighbors
 import tspDraw.graphics
 import tspDraw.jobs
+import tspDraw.interactive
