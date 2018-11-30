@@ -5,11 +5,13 @@ Allow an interactive session for doing annealing.
 import tspDraw.sizeScale
 import numpy as np
 import matplotlib.pyplot as plt
+import keyboard
 
 _commandShortcuts = { "stop" : "s"
                     , "continue" : "c"
                     , "graph energies" : "g"
                     , "graph cycle" : "c"
+                    , "graph result" : "r"
                     , "print stats" : "p"
                     , "change annealer" : "a"
                     , "change temperature" : "t"
@@ -32,7 +34,7 @@ class InputTranslation:
     
 class Session:
 
-    def __init__(self, vertices, nJobsBetweenInquiry = 30, nStepsPerJob = 10**2, settings = None): 
+    def __init__(self, vertices, nJobsBetweenInquiry = 5, nStepsPerJob = 300, settings = None): 
         '''
         Parameters
         ----------
@@ -47,7 +49,7 @@ class Session:
 
         self.running = False
         self.doingJobs = False
-        self.graphingEnergies = False
+        self.graphingEnergies = True 
         self.printingStats = True
         self.changingTemperature = False
         self.changingScale = False
@@ -58,6 +60,7 @@ class Session:
         if self.settings == None:
 
             settings = tspDraw.sizeScale.guessSettings(vertices, nStepsPerJob, nJobsBetweenInquiry * 10)
+            settings['sizeCool'] = 1.0
 
         print(settings)
         self.annealer = tspDraw.sizeScale.Annealer(self.nStepsPerJob, self.vertices, **settings)
@@ -70,16 +73,16 @@ class Session:
         while(self.running): 
 
             self._runState()
-            self.doingJobs = False
-            self._getNextCommand()
-            self._setState()
+            print("Press m for menu")
+            if keyboard.is_pressed('m') or not self.doingJobs:
+                self._getNextCommand()
+                self._setState()
 
         return 
 
     def _doAnnealingJob(self):
 
         self.annealer.doWarmRestart()
-        startEnergy = self.annealer.getEnergy()
         newEnergies = startEnergy + np.array(list(self.annealer))
    
     def _printCommands(self):
@@ -118,7 +121,7 @@ class Session:
             self.command = translation.result
                
     def _setState(self):
- 
+
             if self.command == "stop":
                 self.running = False
 
@@ -139,6 +142,15 @@ class Session:
                 
             elif self.command == "change annealer":
                 pass 
+        
+            elif self.command == "graph result":
+                cycle = self.annealer.getCycle()
+                plt.clf()
+                plt.plot(cycle[:, 0], cycle[:, 1])
+                plt.show() 
+                plt.clf()
+
+                self.doingJobs = False
 
     def _runState(self):
 
@@ -154,14 +166,27 @@ class Session:
             newScale = input("New Scale")
             newScale = float(newScale)
             self.annealer.sizeScale = newScale
+            try:
+                self.annealer.doWarmRestart()
+            except:
+                print("ERROR TRYING TO CREATE ANNEALER \n TRY DIFFERENT SETTINGS")
+                self.doingJobs = False
+
             self.changingScale = False
 
         if self.doingJobs:
 
             newEnergies = []
-            for i in range(self.nJobsBetweenInquiry):
-                self._doAnnealingJob()
-                newEnergies.append(self.annealer.getEnergy())
+            try:
+                self.annealer.doWarmRestart()
+            except:
+                print("ERROR TRYING TO CREATE ANNEALER \n TRY DIFFERENT SETTINGS")
+                self.doingJobs = False 
+
+            for i in range(self.nStepsPerJob):
+                #self._doAnnealingJob()
+                next(self.annealer)
+            newEnergies.append(self.annealer.getEnergy())
             newEnergies = np.array(newEnergies)
             self._appendEnergies(newEnergies)
 
@@ -171,8 +196,9 @@ class Session:
 
         if self.graphingEnergies:
 
+            plt.cla()
             plt.plot(self.energies)
-            plt.show() 
+            plt.pause(0.01) 
 
     def _appendEnergies(self, newEnergies):
 
