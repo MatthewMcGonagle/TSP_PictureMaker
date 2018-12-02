@@ -139,7 +139,8 @@ class Session:
                 self.doingJobs = False
                 
             elif command == "change annealer":
-                pass 
+                self._changeAnnealer()
+                self.doingJobs = False
         
             elif command == "graph result":
                 self._graphResult()
@@ -189,6 +190,20 @@ class Session:
         plt.show() 
         plt.clf()
 
+    def _changeAnnealer(self):
+
+        print("Inside _changeAnnealer()")
+        if type(self.annealer) is tspDraw.sizeScale.Annealer:
+
+            print("Changing annealer")
+            self.vertices = self.annealer.getCycle()[:-1]
+            settings = { 'temperature' : self.annealer.temperature,
+                         'cooling' : self.annealer.tempCool,
+                         'kNbrs' : 30,
+                         'nbrsCooling' : 1
+                        }
+            self.annealer = tspDraw.neighbors.Annealer(self.nStepsPerJob, self.vertices, **settings) 
+        
 
     def _runState(self):
 
