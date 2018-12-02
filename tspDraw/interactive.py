@@ -51,11 +51,8 @@ class Session:
         self.doingJobs = False
         self.graphingEnergies = True 
         self.printingStats = True
-        self.changingTemperature = False
-        self.changingScale = False
 
         self.settings = settings
-        self.command = None
 
         if self.settings == None:
 
@@ -75,8 +72,9 @@ class Session:
             self._runState()
             print("Press m for menu")
             if keyboard.is_pressed('m') or not self.doingJobs:
-                self._getNextCommand()
-                self._setState()
+                command = self._getNextCommand()
+                self._processCommand(command)
+                #self._setState()
 
         return 
 
@@ -94,10 +92,6 @@ class Session:
                 print(" ")
         print(" ")
 
-
-    def _commandMatches(self, validCommand):
-
-        return (self.command == validCommand) | (self.command == _commandShortcuts[validCommand])
 
     def _getNextCommand(self):
 
@@ -118,61 +112,85 @@ class Session:
             else:
                 haveCommand = True
 
-            self.command = translation.result
-               
-    def _setState(self):
-
-            if self.command == "stop":
+            command = translation.result
+    
+        return command
+              
+    def _processCommand(self, command):
+        
+            if command == "stop":
                 self.running = False
 
-            elif self.command == "continue":
+            elif command == "continue":
                 self.doingJobs = True 
 
-            elif self.command == "graph energies":
+            elif command == "graph energies":
                 self.graphingEnergies = True 
 
-            elif self.command == "print stats":
+            elif command == "print stats":
                 self.printingStats = True
 
-            elif self.command == "change temperature":
-                self.changingTemperature = True
+            elif command == "change temperature":
+                self._changeTemperature() 
+                self.doingJobs = False
 
-            elif self.command == "change scale":
-                self.changingScale = True
+            elif command == "change scale":
+                self._changeScale()
+                self.doingJobs = False
                 
-            elif self.command == "change annealer":
+            elif command == "change annealer":
                 pass 
         
-            elif self.command == "graph result":
-                cycle = self.annealer.getCycle()
-                plt.clf()
-                plt.plot(cycle[:, 0], cycle[:, 1])
-                plt.show() 
-                plt.clf()
-
+            elif command == "graph result":
+                self._graphResult()
                 self.doingJobs = False
 
-    def _runState(self):
+    def _changeTemperature(self):
 
-        if self.changingTemperature:
+        validInput = False 
+        while not validInput:
 
             newTemp = input("New Temperature")
-            newTemp = float(newTemp)
-            self.annealer.temperature = newTemp
-            self.changingTemperature = False
+            try:
+                newTemp = float(newTemp)
+                validInput = True
+            except:
+                print("Invalid floating point number")
+                
+        self.annealer.temperature = newTemp
 
-        if self.changingScale:
+    def _changeScale(self):
+
+         validInput = False
+
+         while not validInput:
         
             newScale = input("New Scale")
-            newScale = float(newScale)
-            self.annealer.sizeScale = newScale
-            try:
-                self.annealer.doWarmRestart()
-            except:
-                print("ERROR TRYING TO CREATE ANNEALER \n TRY DIFFERENT SETTINGS")
-                self.doingJobs = False
 
-            self.changingScale = False
+            try:
+                newScale = float(newScale)
+                validInput = True
+            except:
+                print("Invalid floating point number")
+
+         self.annealer.sizeScale = newScale
+
+         try:
+             self.annealer.doWarmRestart()
+         except:
+             print("ERROR TRYING TO CREATE ANNEALER, BAD SIZE SCALE \nTRY DIFFERENT SETTINGS")
+             self.doingJobs = False
+      
+    def _graphResult(self):
+
+        cycle = self.annealer.getCycle()
+        plt.clf()
+        plt.plot(cycle[:, 0], cycle[:, 1])
+        plt.show() 
+        plt.clf()
+
+
+    def _runState(self):
 
         if self.doingJobs:
 
@@ -198,7 +216,7 @@ class Session:
 
             plt.cla()
             plt.plot(self.energies)
-            plt.pause(0.01) 
+            plt.pause(0.001) 
 
     def _appendEnergies(self, newEnergies):
 
