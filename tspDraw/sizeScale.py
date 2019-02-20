@@ -1,6 +1,7 @@
 import numpy as np
+import tspDraw.base
 
-class Annealer:
+class Annealer(tspDraw.base.Annealer):
     '''
     An iterator for performing annealing based on a size scale. The annealing is done on a pool of vertices
     that are on an edge of the cycle that is at least as long as the current size scale; so one should think
@@ -11,26 +12,8 @@ class Annealer:
     
     Members
     -------
-    nSteps : Int
-        The total number of steps to run.
-    
-    stepsProcessed : Int
-        The number of steps run so far.
-    
-    vertices : Numpy Array of Floats of Shape (nVertices, 2)
-        Holds the coordinates of the vertices.
-    
-    nVertices : Int
-        The number of vertices in travelling salesman problem.
-    
-    temperature : Float
-        The temperature to use in the simulated annealing algorithm. It is part of
-        determining the probability of moving to a state with higher length.
-    
-    tempCool : Float
-        The multiplicative factor to use to cool the temperature at each step. For cooling,
-        it should be between 0 and 1.
-    
+    Members Inherited from tspDraw.base.Annealer
+ 
     sizeScale : Float
         The current size scale. Used when setting up the pool of vertices between jobs.
         At the time of construction, the pool consists of vertices touching a segment
@@ -38,10 +21,6 @@ class Annealer:
     
     sizeCool : Float
         The multiplicative factor to use to lower the sizeScale at each step. 
-    
-    vOrder : Numpy array of Int of shape (nVertices + 1)
-        Holds the order of the vertices in the path. So vOrder[2] holds the index 
-        (of self.vertices) for the third vertex in the path.
     
     poolV : Numpy array of Int of shape (nPool)
         The indices of the elements of vOrder that appear in the pool.
@@ -77,84 +56,28 @@ class Annealer:
             The rate (or decay) of the size scale. The size cooling is applied via multiplication by sizeCool.
 
         '''
-
-        # Set up step counting for iteration.
-        self.nSteps = nSteps
-        self.stepsProcessed = 0
-
-        # Set up vertices data.
-        self.vertices = vertices
-        self.nVertices = len(vertices)
-
-        # Set up temperature and size scale data.
-        self.temperature = temperature
-        self.tempCool = tempCool
+        tspDraw.base.Annealer.__init__(self, nSteps, vertices, temperature, tempCool)  
         self.sizeScale = sizeScale
         self.sizeCool = sizeCool
-
-        # Set up array that holds the order that the vertices currently appear in the cycle. 
-        self.vOrder = np.arange(self.nVertices)
 
         # Initialize the pool of vertices for the size scale to be None. Then set up the scale pool 
         # based on the initial scale size.
         self.poolV = None
-        self.nPool = None
-        self.setScalePool()
+        self.nPool = 0 
+        self._findScalePool()
 
-    def __iter__(self):
+    def doWarmRestart(self):
         '''
-        Iterator function for class.
-
-        Returns
-        -------
-        self
+        Do a warm restart of the iterator. This also updates the size scale vertex pool.
         '''
+        tspDraw.base.Annealer.doWarmRestart(self)
+        self._findScalePool()
 
-        return self
-
-    def __next__(self):
-        '''
-        Do the next iteration step of the annealing. Note that we do NOT update the vertex pool that
-        the annealing is performed upon.
-        
-        Returns
-        -------
-        Float
-            The energy difference between the new cycle and the current cycle.
-        '''
-
-        if self.stepsProcessed >= self.nSteps:
-    
-            raise StopIteration
-
-        # First do cooling and update the step count.
-
-        self.temperature *= self.tempCool
-        self.stepsProcessed += 1
+    def _updateState(self):
+        tspDraw.base.Annealer._updateState(self)
         self.sizeScale *= self.sizeCool
 
-        # Find the energy difference resulting from switching the order of the cycle between two random
-        # vertices taken from the size scale pool of vertices. 
-
-        begin, end = self.getRandomPair()
-
-        energyDiff = self.getEnergyDifference(begin, end)
-
-        # Deal with whether to accept proposal switch based on the energy difference. 
-
-        if energyDiff < 0:
-            proposalAccepted = True
-
-        else:
-            proposalAccepted = self.runProposalTrial(energyDiff)
-
-        if proposalAccepted:
-
-            self.reverseOrder(begin, end)
-
-        return energyDiff
-
-    def setScalePool(self):
+    def _findScalePool(self):
         '''
         Reset the pool of vertices for annealing based on the current cycle edge sizes and
         the current size scale.
@@ -164,10 +87,10 @@ class Annealer:
 
         # First find the interior differences, i.e. the vector differences between vertices in the
         # cycle excluding the difference between the final and last vertex.
-        interiorDiff = self.vertices[self.vOrder[1:]] - self.vertices[self.vOrder[:-1]] 
+        interiorDiff = self.vertices[1:] - self.vertices[:-1] 
 
         # Next find the vector difference between the first vertex and the last vertex. 
-        joinDiff = self.vertices[self.vOrder[-1]] - self.vertices[self.vOrder[0]]
+        joinDiff = self.vertices[-1] - self.vertices[0]
 
         # Find the forward differences and backward differences for each vertex.
         forwardDiff = np.concatenate([interiorDiff, [joinDiff]], axis = 0) 
@@ -189,7 +112,7 @@ class Annealer:
 
             raise ValueError('Size scale pool has less than two vertices.')
 
-    def getRandomPair(self):
+    def _makeRandomPair(self):
         ''' 
         Get a random pair of vertices from the pool of vertices in the current size pool. This
         should only be called if there are atleast two vertices in the size scale pool.
@@ -222,8 +145,7 @@ class Annealer:
 
             return end, begin
 
-
-    def reverseOrder(self, i, j):
+    def _makeMove(self, i, j):
         '''
         Reverse the order of vertices between the ith vertex in the ith vertex in the cycle and the jth
         vertex in the cycle. Not that this reverses elements contained in the array self.vOrder and
@@ -245,150 +167,9 @@ class Annealer:
             cycle. The index j should be greater than the index i. 
         '''
 
-        self.vOrder[i : j + 1] = np.flip(self.vOrder[i : j + 1], axis = 0)
-
-    def getEnergyDifference(self, i, j):
-        '''
-        Find the energy (i.e. length) difference resulting from reversing the path between
-        the ith vertex in the cycle with the jth vertex in the cycle. Both of the indices i and j 
-        should be greater than 0 (i.e. excluding the first vertex in the cycle) and less than
-        self.nVertices - 1 (i.e. excluding the last vertex in the cycle).
-
-        Parameters
-        ----------
-        i : Int
-            Index for the ith vertex in the cycle. Should be greater than 0 and less than self.nVertices - 1.
-
-        j : Int
-            Index for the jth vertex in the cycle. Should be greater than 0 and less than self.nVertices - 1.
-
-        Returns
-        -------
-        Float
-            The energy different (i.e. length difference) resulting from a proposed reversal.
-        '''
-
-        begin = self.vertices[self.vOrder[i]]
-        if i > 0:
-            beginParent = self.vertices[self.vOrder[i - 1]]
-        else:
-            beginParent = self.vertices[self.vOrder[self.nVertices - 1]]
-
-        end = self.vertices[self.vOrder[j]]
-        if j < self.nVertices - 1:
-            endChild = self.vertices[self.vOrder[j + 1]]
-        else:
-            endChild = self.vertices[self.vOrder[0]]
-       
-        oldEnergy = np.linalg.norm(begin - beginParent) + np.linalg.norm(end - endChild)
-        newEnergy = np.linalg.norm(begin - endChild) + np.linalg.norm(end - beginParent)         
-
-        energyDiff = newEnergy - oldEnergy
-
-        return energyDiff
-
-    def runProposalTrial(self, energyDiff):
-        '''
-        Run the bernoulli trial for determining whether to accept a proposed reversal in the case
-        that the reversal will result in an increase in energy.
-
-        Parameters
-        ----------
-        energyDiff : Float
-            The energy difference (i.e. lengthDifference) for the proposal. This should be greater than 0.
-
-        Returns
-        -------
-        Bool
-            Whether to accept the proposal based on the random bernoulli trial.
-        '''
-
-        prob = np.exp(-energyDiff / self.temperature)
-
-        trial = np.random.uniform()
-
-        return (trial < prob)
-
-    def getCycle(self):
-        '''
-        Get the vertices in the order they appear in the cycle. 
-
-        Returns
-        -------
-        Numpy array of shape (nVertices, 2)
-            The coordinates of the vertices for the order they appear in the cycle. 
-        '''
-        
-        cycle = self.vertices[self.vOrder]
-        begin = self.vertices[self.vOrder[0]]
-        cycle = np.concatenate([cycle, [begin]], axis = 0)
-        return cycle 
-
-    def getOrder(self):
-        '''
-        Get the order that the vertices appear in the cycle.
-
-        Returns 
-        -------
-        Numpy array of Int of shape (nVertices)
-            Indices of the vertices as they appear in the cycle; e.g. array[0] is the index of the first vertex
-            in the original vertex array.
-        '''
-
-        return self.vOrder
-
-    def getEnergy(self):
-        '''
-        Get the length of the current cycle.
-
-        Returns
-        -------
-        Float
-            The length of the current cycle.
-        '''
-
-        # First find the length for the edge connecting the first vertex to the last.
-
-        energy = self.getLength(0, self.nVertices - 1) 
-
-        # Now add in the lengths of the other edges.
-
-        for i in np.arange(0, self.nVertices - 1, dtype = 'int'):  
-
-            energy += self.getLength(i, i+1) 
-
-        return energy
-
-    def getLength(self, pathi, pathj):
-        ''' 
-        Get the length of the line segment between the vertex at position pathi in the cycle and 
-        the position pathj in the cycle.
-
-        Parameters
-        ----------
-        pathi : Int
-            The first vertex is at position pathi in the path, i.e. the index of an element in vOrder.
-
-        pathj : Int
-            The second vertex is at position in the path, i.e. the index of an element in vOrder.
-
-        Returns
-        -------
-        Float
-            The length of the line segment between the two vertices.
-        '''
-        point1 = self.vertices[self.vOrder[pathi]]
-        point2 = self.vertices[self.vOrder[pathj]]
-        length = np.linalg.norm(point2 - point1)
-        return length
-
-    def doWarmRestart(self):
-        '''
-        Do a warm restart of the iterator. This also updates the size scale vertex pool.
-        '''
-
-        self.stepsProcessed = 0
-        self.setScalePool()
+        # Note that flip two vertices in the vertex pool keeps them in the pool; Note that we do not require
+        # that self.poolV is ordered.
+        self.vertices[i : j + 1] = np.flip(self.vertices[i : j + 1], axis = 0)
 
     def getInfoString(self):
         '''
@@ -401,11 +182,8 @@ class Annealer:
             temperature.
         '''
 
-        energy = self.getEnergy()
-        info = 'Energy = ' + str(energy)
+        info = tspDraw.base.Annealer.getInfoString(self)
         info += '\tnPool = ' + str(self.nPool)
-        info += '\tTemperature = ' + str(self.temperature)
-
         return info
 
 ##########################################

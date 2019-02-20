@@ -1,3 +1,5 @@
+import numpy as np
+
 class Annealer:
 
     def __init__(self, nSteps, vertices, temperature, tempCool):
@@ -76,7 +78,7 @@ class Annealer:
         self.temperature *= self.tempCool
         self.stepsProcessed += 1
 
-    def _findEnergyDifference(self, begin, end):
+    def _findEnergyDifference(self, i, j):
         '''
         Find the energy (i.e. length) difference resulting from reversing the path between
         the ith vertex in the cycle with the jth vertex in the cycle. Both of the indices i and j 
@@ -97,17 +99,17 @@ class Annealer:
             The energy different (i.e. length difference) resulting from a proposed reversal.
         '''
 
-        begin = self.vertices[self.vOrder[i]]
+        begin = self.vertices[i]
         if i > 0:
-            beginParent = self.vertices[self.vOrder[i - 1]]
+            beginParent = self.vertices[i - 1]
         else:
-            beginParent = self.vertices[self.vOrder[self.nVertices - 1]]
+            beginParent = self.vertices[self.nVertices - 1]
 
-        end = self.vertices[self.vOrder[j]]
+        end = self.vertices[j]
         if j < self.nVertices - 1:
-            endChild = self.vertices[self.vOrder[j + 1]]
+            endChild = self.vertices[j + 1]
         else:
-            endChild = self.vertices[self.vOrder[0]]
+            endChild = self.vertices[0]
        
         oldEnergy = np.linalg.norm(begin - beginParent) + np.linalg.norm(end - endChild)
         newEnergy = np.linalg.norm(begin - endChild) + np.linalg.norm(end - beginParent)         
@@ -115,6 +117,28 @@ class Annealer:
         energyDiff = newEnergy - oldEnergy
 
         return energyDiff
+
+    def _runProposalTrial(self, energyDiff):
+        '''
+        Run the bernoulli trial for determining whether to accept a proposed reversal in the case
+        that the reversal will result in an increase in energy.
+
+        Parameters
+        ----------
+        energyDiff : Float
+            The energy difference (i.e. lengthDifference) for the proposal. This should be greater than 0.
+
+        Returns
+        -------
+        Bool
+            Whether to accept the proposal based on the random bernoulli trial.
+        '''
+
+        prob = np.exp(-energyDiff / self.temperature)
+
+        trial = np.random.uniform()
+
+        return (trial < prob)
 
     def _makeRandomPair(self):
         raise Exception("_getRandomPair() is still virtual")
