@@ -235,6 +235,7 @@ class Annealer(tspDraw.base.Annealer):
         '''
 
         info = tspDraw.base.Annealer.getInfoString(self)
+        info += '\tsizeScale = ' + str(self.sizeScale)
         info += '\tnPool = ' + str(self.nPool)
         return info
 
