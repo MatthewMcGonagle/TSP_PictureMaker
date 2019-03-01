@@ -4,6 +4,8 @@ from PIL import Image
 
 import tspDraw
 
+myInputFileName = 'tigerHeadResize.png'
+
 ###########################
 #### Main executable
 ##########################
@@ -16,11 +18,7 @@ finalFigSize = (10, 10)
 
 # Open the image.
 
-image = Image.open('tigerHeadResize.png').convert('L')
-#image = Image.open('vonNeumann2.gif').convert('L')
-#image = Image.open('escher.jpg').convert('L')
-#image = Image.open('wolf.jpg').convert('L')
-#image = Image.open('futurama.jpg').convert('L')
+image = Image.open(myInputFileName).convert('L')
 pixels = tspDraw.graphics.getPixels(image, ds = 1)
 plt.imshow(pixels, cmap = 'gray')
 plt.show()
@@ -36,6 +34,7 @@ plt.show()
 # do the preprocessing.
 
 vertices = tspDraw.dithering.getVertices(dithering)
+print("Number Vertices = ", len(vertices))
 vertices = tspDraw.processVertices.preprocess(vertices)
 print('Preprocessing Complete')
 plt.scatter(vertices[:, 0], vertices[:, 1])
