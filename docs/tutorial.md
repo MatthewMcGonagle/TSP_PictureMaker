@@ -11,7 +11,8 @@ those given in the tutorial. However, they should be similar.
 # Picking a Picture
 
 For this tutorial, we will be using `tigerHeadResize.png` as found in the root directory of the project: 
-![Original Tiger Head Resize](../tigerHeadResize.png)
+
+![Original Tiger Head Resize](https://raw.githubusercontent.com/MatthewMcGonagle/TSP_PictureMaker/master/tigerHeadResize.png)
 
 Now, for finding your own pictures, there are a couple things you will want to take into account.
 1. Don't use a picture that is too dark. The darker your picture, the more vertices that will be

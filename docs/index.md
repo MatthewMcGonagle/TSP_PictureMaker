@@ -11,7 +11,7 @@ As an example, the following picture:
 
 was made from the following original picture:
 
-![Original Tiger Head](../tigerHeadResize.png)
+![Original Tiger Head Resize](https://raw.githubusercontent.com/MatthewMcGonagle/TSP_PictureMaker/master/tigerHeadResize.png)
 
 # Using `TSP_PictureMaker` 
 
