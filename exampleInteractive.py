@@ -23,22 +23,20 @@ pixels = tspDraw.graphics.getPixels(image, ds = 1)
 plt.imshow(pixels, cmap = 'gray')
 plt.show()
 
-# Get the dithered image.
+# Get the dithered image and its vertices.
 
 ditheringMaker = tspDraw.dithering.DitheringMaker()
 dithering = ditheringMaker.makeDithering(pixels)
+vertices = tspDraw.dithering.getVertices(dithering)
+
+print("Number Vertices = ", len(vertices))
 plt.imshow(dithering, cmap = 'gray')
 plt.show()
 
-# Get the vertices from the dithered image and then
-# do the preprocessing.
+# Do the preprocessing of the vertices.
 
-vertices = tspDraw.dithering.getVertices(dithering)
-print("Number Vertices = ", len(vertices))
 vertices = tspDraw.processVertices.preprocess(vertices)
 print('Preprocessing Complete')
-plt.scatter(vertices[:, 0], vertices[:, 1])
-plt.show()
 
 session = tspDraw.interactive.Session(vertices)
 session.run()
