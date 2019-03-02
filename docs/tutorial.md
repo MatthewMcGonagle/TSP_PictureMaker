@@ -73,7 +73,7 @@ matter much if we have a lot of vertices).
 The greedy guess may take some time to make. Please be patient as it is being created. Once it is done, the
 interactive annealing will start.
 
-# Running the First Step of Annealing
+# Running the First Step of Annealing, the `sizeScale` Annealer
 
 There are different types of annealers to run on the problem. The interactive session starts with `sizeScale`
 annealer. This annealer starts by making a pool of vertices, such that each vertex touches an edge that is
@@ -109,3 +109,76 @@ To see what the current cycle looks like simply:
 3. Look at the picture window to see what the current cycle looks like. When you are done, close the picture
 window, and the terminal will return to the main menu.
 4. Enter `c` for continue. 
+
+For the picture in the tutorial, we are able to get the energy down to about 129.98. We decrease sizeScale to
+about 0.02 in decrements of 0.01. Each time we reset the temperature to 0.001. To know when to change the size 
+scale, look for when there is very little improvement in the energy (keep an eye on the max and min of the 
+y axis for the energy graph).
+
+# Changing the Annealer for the Second Step
+
+Now we are ready to change the annealer. You have the ability to change to any available annealer type, but we 
+recommend changing to the `sizeNeighbors` annealer for the second step. This is the annealer the tutorial
+will be switching to. To change the annealer, 
+1. Press `m` for the menu.
+2. Enter `a` for changing the annealer.
+3. Enter `i` for the `sizeNeighbors` annealer.
+4. Make sure the temperature looks reasonable compared to what you have been using before. It is possible
+that the program has made a bad guess at a nice temperature for this annealer.
+5. If you need to switch the temperature, then enter `t` to change the temperature and enter a new 
+floating point temperature. We recommend `0.001`.
+6. Enter `c` to continue.
+
+# Using the `sizeNeighbors` Annealer
+
+The `sizeNeighbors` annealer uses a minimum size scale to find a pool of vertices to choose from (similar
+to the `sizeScale` annealer). However, after choosing one vertex from the pool, the second vertex is
+now randomly chosen from the neighbors of that vertex. The idea is to concentrate on the largest edges and
+try to decrease their size by switching place with nearby vertices.
+
+As you run the annealer, you will have to change the size scale. To do so, the directions are exactly the
+same for the `sizeScale` annealer described above. Similarly, you will need to reset the temperature.
+
+You should run this annealer until the size of the pool `nPool` won't decrease beyond a reasonable size. 
+
+For this tutorial example, you should have success by decreasing the size scale to 0.01 in decrements of 0.01.
+Then try decreasing to a size scale of 0.005 in decrements that don't go too fast (maybe try 0.001 or 0.002).
+Try to make sure there aren't too many points in the pool; so try to keep `nPool` below say 5000.
+Also watch out for when you have diminishing returns on the energy decrease in the energy graph. Doing so we
+are able to get the energy down to about 108.80. 
+
+
+There isn't really any hard and fast numbers to make this work. You sort of need to get a feel for it and
+just let the program run to do its job.
+
+# Using the `neighbors` Annealer, Final Step
+
+The `neighbors` annealer doesn't use a pool of vertices. It randomly chooses a first vertex from all of the
+vertices, and then chooses a second vertex from its neighbors. To change to the `neigbors` annealer:
+1. Press `m` for menu.
+2. Enter `a` to change the annealer.
+3. Enter `n` for the neighbors annealer.
+4. Check your temperature, and change it if needed.
+5. Enter `c` to continue.
+
+After letting it run (and once in a while resetting the temperature to about 0.0007), we get an
+energy of 108.03. Let's now graph and save the result.
+
+# Graphing and Saving the Result
+
+Follow these steps:
+1. Press `m` for menu.
+2. Press `r` for graph results. This opens an interactive `pyplot` window containing the graph of 
+the cycle.
+3. In the graph window, click on the disk icon to save a copy of the graph.
+4. Save a version of the graph. We recommend saving it as a vector graphics `.svg` file so
+that you can edit the graph using other software. 
+
+If you save a `.svg` version of the file, then you can use vector graphics editing software such as
+[Inkscape](https://inkscape.org/) to edit the image. For example, you can use Inkscape to remove
+the axes (you will need to ungroup the objects in the image), change the background, or add
+color gradients. 
+
+# Exiting
+
+To exit, from the menu, simply enter `s`.
