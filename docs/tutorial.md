@@ -179,6 +179,11 @@ If you save a `.svg` version of the file, then you can use vector graphics editi
 the axes (you will need to ungroup the objects in the image), change the background, or add
 color gradients. 
 
+For example, [click here to open](tutorialResult.svg) an edited `.svg` version of our result. Using
+Inkscape, we exported the result into the following `.png` file.
+
+![Inkscape Edited Result, Tiger Head with Gradients](tutorialResultRaster.png)
+
 # Exiting
 
 To exit, from the menu, simply enter `s`.
