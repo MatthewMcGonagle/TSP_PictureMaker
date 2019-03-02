@@ -1,3 +1,7 @@
+You may also consult the [Project Page](https://matthewmcgonagle.github.io/TSP_PictureMaker/) and the 
+[Interactive Session Tutorial](https://matthewmcgonagle.github.io/TSP_PictureMaker/tutorial.html).
+
+# What is TSP_PictureMaker?
 `TSP_PictureMaker` is a module library for converting a picture to a a depiction created by an approximate solution
 to the Travelling Salesman Problem (TSP). As an example, the code in `example.py` takes the following picture of a tiger's head:
 
