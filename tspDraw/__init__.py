@@ -1,7 +1,7 @@
 import tspDraw.dithering
 import tspDraw.processVertices
 import tspDraw.base
-import tspDraw.sizeScale
+import tspDraw.size_scale
 import tspDraw.neighbors
 import tspDraw.sizeNeighbors
 import tspDraw.graphics
