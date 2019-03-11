@@ -13,10 +13,10 @@ class Annealer(tspDraw.size_scale.Annealer):
     '''
 
     def __init__(self, nSteps, vertices, temperature, temp_cool, size_scale,
-                 sizeCool, k_nbrs, nbrs_cool):
+                 size_cool, k_nbrs, nbrs_cool):
 
         tspDraw.size_scale.Annealer.__init__(self, nSteps, vertices, temperature,
-                                             temp_cool, size_scale, sizeCool)
+                                             temp_cool, size_scale, size_cool)
         self.k_nbrs = k_nbrs
         self.nbrs_cool = nbrs_cool
 

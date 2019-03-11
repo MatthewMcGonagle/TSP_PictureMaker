@@ -51,7 +51,7 @@ class Session:
 
             settings = tspDraw.size_scale.guess_settings(vertices, n_steps_per_job,
                                                          n_jobs_between_inquiry * 10)
-            settings['sizeCool'] = 1.0
+            settings['size_cool'] = 1.0
 
         self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job, self.vertices, **settings)
 
@@ -146,8 +146,8 @@ class Session:
         self.vertices = self.annealer.vertices.copy()
 
         if new_annealer == "neighbors":
-            settings.update({'kNbrs' : 30,
-                             'nbrsCool' : 1
+            settings.update({'k_nbrs' : 30,
+                             'nbrs_cool' : 1
                             })
             self.annealer = tspDraw.neighbors.Annealer(self.n_steps_per_job, self.vertices,
                                                        **settings)
@@ -155,16 +155,16 @@ class Session:
         elif new_annealer == "size_scale":
             settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
                                                               self.n_jobs_between_inquiry * 10))
-            settings['sizeCool'] = 1.0
+            settings['size_cool'] = 1.0
             self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job,
                                                         self.vertices, **settings)
 
         elif new_annealer == "size_neighbors":
             settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
                                                               self.n_jobs_between_inquiry * 10))
-            settings['sizeCool'] = 1.0
-            settings.update({'kNbrs' : 30,
-                             'nbrsCool' : 1
+            settings['size_cool'] = 1.0
+            settings.update({'k_nbrs' : 30,
+                             'nbrs_cool' : 1
                             })
             self.annealer = tspDraw.size_neighbors.Annealer(self.n_steps_per_job,
                                                             self.vertices, **settings)
