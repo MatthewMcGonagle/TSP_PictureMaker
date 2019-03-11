@@ -12,11 +12,11 @@ class Annealer(tspDraw.size_scale.Annealer):
     then selects a random neighbor of random vertex from the candidate pool.
     '''
 
-    def __init__(self, nSteps, vertices, temperature, tempCool, size_scale,
+    def __init__(self, nSteps, vertices, temperature, temp_cool, size_scale,
                  sizeCool, k_nbrs, nbrs_cool):
 
         tspDraw.size_scale.Annealer.__init__(self, nSteps, vertices, temperature,
-                                             tempCool, size_scale, sizeCool)
+                                             temp_cool, size_scale, sizeCool)
         self.k_nbrs = k_nbrs
         self.nbrs_cool = nbrs_cool
 

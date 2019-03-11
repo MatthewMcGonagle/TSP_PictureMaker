@@ -8,7 +8,7 @@ import keyboard
 
 import tspDraw.size_scale
 import tspDraw.neighbors
-import tspDraw.sizeNeighbors
+import tspDraw.size_neighbors
 import tspDraw.user_input
 
 class SessionState:
@@ -159,14 +159,14 @@ class Session:
             self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job,
                                                         self.vertices, **settings)
 
-        elif new_annealer == "sizeNeighbors":
+        elif new_annealer == "size_neighbors":
             settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
                                                               self.n_jobs_between_inquiry * 10))
             settings['sizeCool'] = 1.0
             settings.update({'kNbrs' : 30,
                              'nbrsCool' : 1
                             })
-            self.annealer = tspDraw.sizeNeighbors.Annealer(self.n_steps_per_job,
+            self.annealer = tspDraw.size_neighbors.Annealer(self.n_steps_per_job,
                                                            self.vertices, **settings)
 
     def _run_state(self):

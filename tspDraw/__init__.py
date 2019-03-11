@@ -3,7 +3,7 @@ import tspDraw.processVertices
 import tspDraw.base
 import tspDraw.size_scale
 import tspDraw.neighbors
-import tspDraw.sizeNeighbors
+import tspDraw.size_neighbors
 import tspDraw.graphics
 import tspDraw.jobs
 import tspDraw.interactive
