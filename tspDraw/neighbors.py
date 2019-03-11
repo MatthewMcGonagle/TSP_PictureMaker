@@ -1,3 +1,7 @@
+'''
+Annealer that selects a random vertex and then randomly selects a second vertex
+from a number of the first's nearest neighbors.
+'''
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 import tspDraw.base
@@ -6,41 +10,43 @@ import tspDraw.base
 #### NeighborsAnnealer
 ##########################################
 
-class Annealer( tspDraw.base.Annealer):
+class Annealer(tspDraw.base.Annealer):
     '''
-    Modified simulated annealer that randomly selects a vertex and then randomly selects another vertex from the
-    k-nearest neighbors of the first vertex. The point of this annealer is to do annealing when the current
-    cycle is at a stage where the changes needed to be made are by switching vertices that are close ot each other.    
+    Modified simulated annealer that randomly selects a vertex and then randomly selects another
+    vertex from the k-nearest neighbors of the first vertex. The point of this annealer is to do
+    annealing when the current cycle is at a stage where the changes needed to be made are by
+    switching vertices that are close ot each other.
 
     Members
     -------
     Members inherited from tspDraw.base.Annealer
-    
-    kNbrs : Float 
-        The number of neighbors to randomly select from. This is converted to an int when doing selection. It is
-        a float because we do geometric cooling on the number of neighbors as we run each step. 
 
-    nbrsCooling : Float
-        The factor to use to cool (decay) the number of neigbors. At each step, it is applied to kNbrs via 
-        multiplication.        
+    k_nbrs : Float
+        The number of neighbors to randomly select from. This is converted to an int when doing
+        selection. It is a float because we do geometric cooling on the number of neighbors as we
+        run each step.
 
-    _nearestNbrs : class NearestNeighbors
-        We use sci-kit-learn NearestNeighbors to find the nearest neighbors of vertices. This is trained on the
-        original order of the vertices, so we need to deal with converting between the original order
-        of the vertices to the current order of the vertices in the array.
+    nbrs_cool : Float
+        The factor to use to cool (decay) the number of neigbors. At each step, it is applied to
+        k_nbrs via multiplication.
 
-    _origToCurrent : Numpy Array of Int of Shape (nVertices)
+    _nearest_nbrs : class NearestNeighbors
+        We use sci-kit-learn NearestNeighbors to find the nearest neighbors of vertices. This is
+        trained on the original order of the vertices, so we need to deal with converting between
+        the original order of the vertices to the current order of the vertices in the array.
+
+    _orig_to_current : Numpy Array of Int of Shape (n_vertices)
         Array for converting from original indices to current indices in cycle. That is
-        origToCurrent[i] is the current index of what was originally the ith vertex. This
-        is needed for dealing with results of nearest neighbors search. 
+        orig_to_current[i] is the current index of what was originally the ith vertex. This
+        is needed for dealing with results of nearest neighbors search.
 
-    _currentToOrig: Numpy Array of Int of Shape (nVertices)
+    _current_to_orig: Numpy Array of Int of Shape (n_vertices)
         Array for converting from the current index of a vertex to the original index of the vertex.
-        That is currentToOrig[i] is the original index of what is now index i in the cycle. This
-        is needed to update origToCurrent when doing a reversal. 
+        That is current_to_orig[i] is the original index of what is now index i in the cycle. This
+        is needed to update orig_to_current when doing a reversal.
     '''
 
-    def __init__(self, nSteps, vertices, temperature, tempCool, kNbrs, nbrsCool):
+    def __init__(self, nSteps, vertices, temperature, temp_cool, k_nbrs, nbrs_cool):
         '''
         Initializer. Make sure to train the nearest neighbors on the original order of the vertices.
 
@@ -50,91 +56,92 @@ class Annealer( tspDraw.base.Annealer):
         nSteps : Int
             The total number of iterations to make.
 
-        vertices : Numpy array of Floats of shape (nVertices, 2)
+        vertices : Numpy array of Floats of shape (n_vertices, 2)
             The vertices in their initial order.
 
         temperature : Float
             The initial temperature to use for the annealing.
 
-        tempCool : Float
+        temp_cool : Float
             The cooling factor to apply to the temperature at each step; it is applied
-            via multiplication. That is, we have geometric cooling. 
+            via multiplication. That is, we have geometric cooling.
 
-        kNbrs : Float
-            The initial value for kNbrs.
+        k_nbrs : Float
+            The initial value for k_nbrs.
 
-        nbrsCool : Float
+        nbrs_cool : Float
             The cooling factor (decay factor) for the number of neighbors; at each step it
-            is applied to kNbrs via multiplication. Note that kNbrs is a float as well.
+            is applied to k_nbrs via multiplication. Note that k_nbrs is a float as well.
         '''
 
-        tspDraw.base.Annealer.__init__(self, nSteps, vertices, temperature, tempCool)
+        tspDraw.base.Annealer.__init__(self, nSteps, vertices, temperature, temp_cool)
 
-        self.kNbrs = kNbrs
-        self.nbrsCool = nbrsCool
+        self.k_nbrs = k_nbrs
+        self.nbrs_cool = nbrs_cool
 
         # Make sure to train the Nearest Neighbors class.
-        self._nearestNbrs = NearestNeighbors()
-        self._nearestNbrs.fit(self.vertices.copy())
+        self._nearest_nbrs = NearestNeighbors()
+        self._nearest_nbrs.fit(self.vertices.copy())
 
         # Conversion indices are originally just the identity function.
-        self._origToCurrent = np.arange(self.nVertices)
-        self._currentToOrig = np.arange(self.nVertices)
+        self._orig_to_current = np.arange(self.n_vertices)
+        self._current_to_orig = np.arange(self.n_vertices)
 
-    def _updateState(self):
-        tspDraw.base.Annealer._updateState(self)
-        self.kNbrs *= self.nbrsCool
+    def _update_state(self):
+        tspDraw.base.Annealer._update_state(self)
+        self.k_nbrs *= self.nbrs_cool
 
-    def _makeRandomPair(self):
+    def _make_random_pair(self):
         '''
         Get a random pair of indices for vertices. The first index is chosen uniformly. The second
         index is chosen from the k-Nearest Neighbors of the first vertex. Note that we convert
-        kNbrs to an Int to get the number of neighbors.
+        k_nbrs to an Int to get the number of neighbors.
 
         Returns
         -------
         (Int, Int)
             The indices of the two random vertices. The first index will be less than the second.
         '''
-        sameNum = True
+        same_num = True
         trivial = True
-        kNbrs = int(self.kNbrs)
+        k_nbrs = int(self.k_nbrs)
 
         # We loop until we have a choice that is two different indices and
         # doesn't include a trivial choice of the first and last indices.
 
-        while sameNum or trivial:
-        
-            begin = np.random.randint(self.nVertices)
-            beginV = self.vertices[begin].reshape(1,-1)
+        while same_num or trivial:
+
+            begin = np.random.randint(self.n_vertices)
+            begin_v = self.vertices[begin].reshape(1, -1)
 
             # Find the neighbors of begin.
-            _, nbrsI = self._nearestNbrs.kneighbors(beginV, n_neighbors = kNbrs)
-            nbrsI = nbrsI.reshape(-1)
+            _, nbrs_i = self._nearest_nbrs.kneighbors(begin_v, n_neighbors = k_nbrs)
+            nbrs_i = nbrs_i.reshape(-1)
 
             # Randomly choose from the neighbors.
 
-            end = np.random.randint(len(nbrsI))
-            end = nbrsI[end]
-            end = self._origToCurrent[end]
+            end = np.random.randint(len(nbrs_i))
+            end = nbrs_i[end]
+            end = self._orig_to_current[end]
 
             # Check that our pair is acceptable.
 
-            sameNum = (begin == end)
-            trivial = (begin == 0) & (end == self.nVertices - 1)
-            
-        if begin < end:
+            same_num = (begin == end)
+            trivial = (begin == 0) & (end == self.n_vertices - 1)
 
-            return begin, end
+        if begin < end:
+            pair = (begin, end)
 
         else:
+            pair = (end, begin)
 
-            return end, begin  
+        return pair
 
-    def _makeMove(self, begin, end):
+    def _make_move(self, begin, end):
         '''
-        Perform a reversal of the segment of the cycle between begin and end (inclusive). Also handles
-        the effects on the conversions between the original and new indices (needed for nearest neighbor search).
+        Perform a reversal of the segment of the cycle between begin and end (inclusive). Also
+        handles the effects on the conversions between the original and new indices (needed for
+        nearest neighbor search).
 
         Parameters
         ----------
@@ -146,26 +153,27 @@ class Annealer( tspDraw.base.Annealer):
 
         '''
 
-        self.vertices[begin : end + 1] = np.flip(self.vertices[begin : end + 1], axis = 0)
-        self._currentToOrig[begin : end + 1] = np.flip(self._currentToOrig[begin : end + 1], axis = 0)
+        self.vertices[begin : end + 1] = np.flip(self.vertices[begin : end + 1],
+                                                 axis = 0)
+        self._current_to_orig[begin : end + 1] = np.flip(self._current_to_orig[begin : end + 1],
+                                                         axis = 0)
 
         # Updating the conversion from original to current indices requires more than a flip.
 
-        beforeFlip = self._currentToOrig[begin : end + 1]
-        self._origToCurrent[beforeFlip] = np.arange(begin, end+1)
+        before_flip = self._current_to_orig[begin : end + 1]
+        self._orig_to_current[before_flip] = np.arange(begin, end+1)
 
-    def getInfoString(self):
+    def get_info_string(self):
         '''
         Get information on the current parameters of the annealing process as a string.
 
         Returns
         -------
         String
-            Contains information on the energy, kNbrs, and the temperature. 
+            Contains information on the energy, k_nbrs, and the temperature.
         '''
 
-        info = tspDraw.base.Annealer.getInfoString(self)
-        info += '\tkNbrs = ' + str(self.kNbrs)
+        info = tspDraw.base.Annealer.get_info_string(self)
+        info += '\tk_nbrs = ' + str(self.k_nbrs)
 
         return info
-

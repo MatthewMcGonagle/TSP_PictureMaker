@@ -64,7 +64,7 @@ class Session:
         '''
         self.state.running = True
         self.state.doing_jobs = True
-        print(self.annealer.getInfoString())
+        print(self.annealer.get_info_string())
         while self.state.running:
 
             self._run_state()
@@ -167,7 +167,7 @@ class Session:
                              'nbrsCool' : 1
                             })
             self.annealer = tspDraw.size_neighbors.Annealer(self.n_steps_per_job,
-                                                           self.vertices, **settings)
+                                                            self.vertices, **settings)
 
     def _run_state(self):
 
@@ -190,7 +190,7 @@ class Session:
 
         if self.state.printing_stats:
 
-            print("\n", self.annealer.getInfoString())
+            print("\n", self.annealer.get_info_string())
 
         if self.state.graphing_energies:
 
