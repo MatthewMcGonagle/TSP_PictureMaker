@@ -2,117 +2,37 @@
 Allow an interactive session for doing annealing.
 '''
 
-import tspDraw.sizeScale
-import tspDraw.neighbors
-import tspDraw.sizeNeighbors
 import numpy as np
 import matplotlib.pyplot as plt
 import keyboard
 
-# _commandShortcuts = { "stop" : "s"
-#                     , "continue" : "c"
-#                     , "graph energies" : "g"
-#                     , "graph cycle" : "c"
-#                     , "print stats" : "p"
-#                     , "change annealer" : "a"
-#                     , "change temperature" : "t"
-#                     , "change scale" : "e"
-#                     , "change cooling" : "l"
-#                     } 
+import tspDraw.size_scale
+import tspDraw.neighbors
+import tspDraw.sizeNeighbors
+import tspDraw.user_input
 
-class InputTranslation:
-
-    def __init__(self, inputString, shortcuts):
-
-        self.valid = False
-        self.result = None
-       
-        for cmd, shortcut in shortcuts.items():
-            if inputString == cmd or inputString == shortcut:
-                self.result = cmd
-                self.valid = True
-                return
-
-
-class InputManager:
+class SessionState:
     '''
-    Responsible for getting input from the user and turning the input into a uniform format (user has multiple options
-    to input commands, such as using shortcuts). 
+    Keeps track of different states of an interactive session.
     '''
 
     def __init__(self):
-        self._mainShortcuts = { "stop" : "s"
-                              , "continue" : "c"
-                              , "graph energies" : "g"
-                              , "graph result" : "r"
-                              , "print stats" : "p"
-                              , "change annealer" : "a"
-                              , "change temperature" : "t"
-                              , "change scale" : "e"
-                              , "change cooling" : "l"
-                              } 
+        '''
+        Initiate the state as not running, not doing jobs, do graph energies,
+        and do print stats.
+        '''
+        self.running = False
+        self.doing_jobs = False
+        self.graphing_energies = True
+        self.printing_stats = True
 
-        self._annealerShortcuts = { "sizeScale" : "s" 
-                                  , "neighbors" : "n" 
-                                  , "sizeNeighbors" : "i"
-                                  }
-
-    def getMainMenuChoice(self):
-
-        return self._getShortcutMenu(self._mainShortcuts, "What do you want to do next?")
-
-    def getFloat(self, name):
-        validInput = False 
-
-        while not validInput:
-            newValue = input("New " + name + "? ") 
-            try:
-                newValue = float(newValue)
-                validInput = True
-            except:
-                print("Invalid floating point number")
-        return newValue
- 
-    def getAnnealerChoice(self):
-
-        return self._getShortcutMenu(self._annealerShortcuts, "Which annealer do you want?")
-        
-    def _printCommands(self, shortcuts):
-
-        print("Commands")
-        for i, cmd in enumerate(shortcuts.keys()):
-            print(cmd, " (", shortcuts[cmd], end = " )\t\t")
-            if i % 3 == 2:
-                print(" ")
-        print(" ")
-
-    def _getShortcutMenu(self, shortcuts, message):
-
-        haveCommand = False
-
-        while not haveCommand:
-
-            self._printCommands(shortcuts)
-            command = input(message)
-
-            translation = InputTranslation(command, shortcuts)
-
-            if not translation.valid:
-
-                print("Command " + command + " unrecognized.\n")
-                haveCommand = False
-
-            else:
-                haveCommand = True
-
-            command = translation.result
-    
-        return command
-
-     
 class Session:
+    '''
+    Runs an interactive session.
+    '''
 
-    def __init__(self, vertices, nJobsBetweenInquiry = 5, nStepsPerJob = 300, settings = None): 
+    def __init__(self, vertices, n_jobs_between_inquiry = 5, n_steps_per_job = 300,
+                 settings = None):
         '''
         Parameters
         ----------
@@ -120,165 +40,174 @@ class Session:
             The vertices to do TSP on.
         '''
 
-        self.vertices = vertices 
+        self.vertices = vertices
         self.annealer = None
-        self.nJobsBetweenInquiry = nJobsBetweenInquiry 
-        self.nStepsPerJob = nStepsPerJob
+        self.n_jobs_between_inquiry = n_jobs_between_inquiry
+        self.n_steps_per_job = n_steps_per_job
 
-        self.running = False
-        self.doingJobs = False
-        self.graphingEnergies = True 
-        self.printingStats = True
+        self.state = SessionState()
 
-        settings = settings
+        if settings is None:
 
-        if settings == None:
-
-            settings = tspDraw.sizeScale.guessSettings(vertices, nStepsPerJob, nJobsBetweenInquiry * 10)
+            settings = tspDraw.size_scale.guess_settings(vertices, n_steps_per_job,
+                                                         n_jobs_between_inquiry * 10)
             settings['sizeCool'] = 1.0
-        self.settings = settings
 
-        print(self.settings)
-        self.annealer = tspDraw.sizeScale.Annealer(self.nStepsPerJob, self.vertices, **settings)
+        self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job, self.vertices, **settings)
 
-        self.inputManager = InputManager()
-        self.energies = np.zeros(nJobsBetweenInquiry * 10)
+        self.energies = np.zeros(n_jobs_between_inquiry * 10)
 
     def run(self):
-        self.running = True
-        self.doingJobs = True
+        '''
+        Run the interactive session. Will loop over running annealers, updating graphs of
+        results, and getting user input. Runs until the user tells the session to stop.
+        '''
+        self.state.running = True
+        self.state.doing_jobs = True
         print(self.annealer.getInfoString())
-        while(self.running): 
+        while self.state.running:
 
-            self._runState()
+            self._run_state()
             print("Press m for menu")
-            if keyboard.is_pressed('m') or not self.doingJobs:
+            if keyboard.is_pressed('m') or not self.state.doing_jobs:
                 #command = self._getNextCommand()
-                command = self.inputManager.getMainMenuChoice()
-                self._processCommand(command)
+                command = tspDraw.user_input.get_main_menu_choice()
+                self._process_command(command)
                 #self._setState()
 
-        return 
+    def _do_annealing_job(self):
 
-    def _doAnnealingJob(self):
+        self.annealer.do_warm_restart()
+        #new_energies = startEnergy + np.array(list(self.annealer))
 
-        self.annealer.doWarmRestart()
-        newEnergies = startEnergy + np.array(list(self.annealer))
-   
-    def _processCommand(self, command):
-        
-            if command == "stop":
-                self.running = False
+    def _process_command(self, command):
+        if command == "stop":
+            self.state.running = False
 
-            elif command == "continue":
-                self.doingJobs = True 
+        elif command == "continue":
+            self.state.doing_jobs = True
 
-            elif command == "graph energies":
-                self.graphingEnergies = True 
+        elif command == "graph energies":
+            self.state.graphing_energies = True
 
-            elif command == "print stats":
-                self.printingStats = True
+        elif command == "print stats":
+            self.state.printing_stats = True
 
-            elif command == "change temperature":
-                self.annealer.temperature = self.inputManager.getFloat("Temperature") 
-                self.doingJobs = False
+        elif command == "change temperature":
+            self.annealer.temperature = tspDraw.user_input.get_float("Temperature")
+            self.state.doing_jobs = False
 
-            elif command == "change scale":
-                self._changeScale()
-                self.doingJobs = False
-                
-            elif command == "change annealer":
-                self._changeAnnealer()
-                self.doingJobs = False
-        
-            elif command == "graph result":
-                self._graphCycle()
-                self.doingJobs = False
+        elif command == "change scale":
+            self._change_scale()
+            self.state.doing_jobs = False
 
-    def _changeScale(self):
+        elif command == "change annealer":
+            self._change_annealer()
+            self.state.doing_jobs = False
 
-         if type(self.annealer) is tspDraw.neighbors.Annealer:
-             print("ANNEALER DOESN'T HAVE SIZE SCALE")
-             self.doingJobs = False
-             return
- 
-         self.annealer.sizeScale = self.inputManager.getFloat("Size Scale") 
+        elif command == "graph result":
+            self._graph_cycle()
+            self.state.doing_jobs = False
 
-         try:
-             self.annealer.doWarmRestart()
-         except:
-             print("ERROR TRYING TO CREATE ANNEALER, NOT ENOUGH VERTICES IN POOL, TRY DECREASING THE SIZE SCALE") 
-             self.doingJobs = False
-      
-    def _graphCycle(self):
+    def _change_scale(self):
 
-        cycle = self.annealer.getCycle()
+        if isinstance(self.annealer, tspDraw.neighbors.Annealer):
+            print("ANNEALER DOESN'T HAVE SIZE SCALE")
+            self.state.doing_jobs = False
+            return
+
+        self.annealer.size_scale = tspDraw.user_input.get_float("Size Scale")
+
+        try:
+            self.annealer.do_warm_restart()
+        except:
+            message = ("ERROR TRYING TO CREATE ANNEALER, NOT ENOUGH VERTICES IN POOL,"
+                       + " TRY DECREASING THE SIZE SCALE")
+            print(message)
+            self.state.doing_jobs = False
+
+    def _graph_cycle(self):
+
+        cycle = self.annealer.get_cycle()
         plt.clf()
         plt.plot(cycle[:, 0], cycle[:, 1])
-        plt.show() 
+        plt.show()
         plt.clf()
 
-    def _changeAnnealer(self):
+    def _change_annealer(self):
 
-        newAnnealer = self.inputManager.getAnnealerChoice()
+        new_annealer = tspDraw.user_input.get_annealer_choice()
 
-        #if type(self.annealer) is tspDraw.sizeScale.Annealer:
-        print("Changing to ", newAnnealer)
-        settings = { 'temperature' : self.annealer.temperature,
-                     'tempCool' : self.annealer.tempCool
+        #if type(self.annealer) is tspDraw.size_scale.Annealer:
+        print("Changing to ", new_annealer)
+        settings = {'temperature' : self.annealer.temperature,
+                    'temp_cool' : self.annealer.temp_cool
                    }
         self.vertices = self.annealer.vertices.copy()
 
-        if newAnnealer == "neighbors": 
-            settings.update( { 'kNbrs' : 30,
-                               'nbrsCool' : 1
-                             } )
-            self.annealer = tspDraw.neighbors.Annealer(self.nStepsPerJob, self.vertices, **settings) 
+        if new_annealer == "neighbors":
+            settings.update({'kNbrs' : 30,
+                             'nbrsCool' : 1
+                            })
+            self.annealer = tspDraw.neighbors.Annealer(self.n_steps_per_job, self.vertices,
+                                                       **settings)
 
-        elif newAnnealer == "sizeScale":
-            settings.update(  tspDraw.sizeScale.guessSettings(self.vertices, self.nStepsPerJob, self.nJobsBetweenInquiry * 10))
+        elif new_annealer == "size_scale":
+            settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
+                                                              self.n_jobs_between_inquiry * 10))
             settings['sizeCool'] = 1.0
-            self.annealer = tspDraw.sizeScale.Annealer(self.nStepsPerJob, self.vertices, **settings) 
+            self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job,
+                                                        self.vertices, **settings)
 
-        elif newAnnealer == "sizeNeighbors":
-             settings.update(  tspDraw.sizeScale.guessSettings(self.vertices, self.nStepsPerJob, self.nJobsBetweenInquiry * 10))
-             settings['sizeCool'] = 1.0
-             settings.update( { 'kNbrs' : 30,
-                                'nbrsCool' : 1
-                              } )
-             self.annealer = tspDraw.sizeNeighbors.Annealer(self.nStepsPerJob, self.vertices, **settings)
+        elif new_annealer == "sizeNeighbors":
+            settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
+                                                              self.n_jobs_between_inquiry * 10))
+            settings['sizeCool'] = 1.0
+            settings.update({'kNbrs' : 30,
+                             'nbrsCool' : 1
+                            })
+            self.annealer = tspDraw.sizeNeighbors.Annealer(self.n_steps_per_job,
+                                                           self.vertices, **settings)
 
-    def _runState(self):
+    def _run_state(self):
 
-        if self.doingJobs:
+        if self.state.doing_jobs:
 
-            newEnergies = []
+            new_energies = []
             try:
-                self.annealer.doWarmRestart()
+                self.annealer.do_warm_restart()
             except:
                 print("ERROR TRYING TO CREATE ANNEALER \n TRY DIFFERENT SETTINGS")
-                self.doingJobs = False 
+                self.state.doing_jobs = False
                 return
 
-            for i in range(self.nStepsPerJob):
-                #self._doAnnealingJob()
+            for _ in range(self.n_steps_per_job):
+                #self._do_annealing_job()
                 next(self.annealer)
-            newEnergies.append(self.annealer.getEnergy())
-            newEnergies = np.array(newEnergies)
-            self._appendEnergies(newEnergies)
+            new_energies.append(self.annealer.get_energy())
+            new_energies = np.array(new_energies)
+            self._append_energies(new_energies)
 
-        if self.printingStats:
+        if self.state.printing_stats:
 
             print("\n", self.annealer.getInfoString())
 
-        if self.graphingEnergies:
+        if self.state.graphing_energies:
 
             plt.cla()
             plt.plot(self.energies)
-            plt.pause(0.001) 
+            plt.pause(0.001)
 
-    def _appendEnergies(self, newEnergies):
+    def _append_energies(self, new_energies):
+        '''
+        Update the most recent energy levels tracked by the session. This is used to give
+        feedback to the user on the recent trends in the energy levels, e.g. graphs of
+        recent energy levels
 
-        numNewEnergies = len(newEnergies)
-
-        self.energies = np.concatenate([self.energies[numNewEnergies:], newEnergies], axis = 0)
+        Parameters
+        ----------
+        new_energies : Numpy array of Float
+            The most recent energies.
+        '''
+        num_new_energies = len(new_energies)
+        self.energies = np.concatenate([self.energies[num_new_energies:], new_energies], axis = 0)
