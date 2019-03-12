@@ -120,9 +120,11 @@ class Session:
 
         try:
             self.annealer.do_warm_restart()
-        except:
-            message = ("ERROR TRYING TO CREATE ANNEALER, NOT ENOUGH VERTICES IN POOL,"
-                       + " TRY DECREASING THE SIZE SCALE")
+        except tspDraw.exception.VertexPoolTooSmall as inst:
+            message = ( "**************\n" +
+                        inst.message +
+                        "\nTry lowering the size scale." +
+                        "\n***************")
             print(message)
             self.state.doing_jobs = False
 
@@ -176,8 +178,12 @@ class Session:
             new_energies = []
             try:
                 self.annealer.do_warm_restart()
-            except:
-                print("ERROR TRYING TO CREATE ANNEALER \n TRY DIFFERENT SETTINGS")
+            except tspDraw.exception.VertexPoolTooSmall as inst:
+                message = ("**************\n" +
+                           inst.message +
+                           "\nTry lowering the size scale." +
+                           "\n**************")
+                print(message)
                 self.state.doing_jobs = False
                 return
 

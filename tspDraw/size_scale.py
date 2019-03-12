@@ -9,6 +9,7 @@ Also has functions for guessing correct initial settings of the annealer.
 
 import numpy as np
 import tspDraw.base
+import tspDraw.exception
 
 def _guess_temperature_settings(n_jobs, n_steps_per_job, segment_length):
     '''
@@ -220,7 +221,8 @@ class Annealer(tspDraw.base.Annealer):
 
         if self.n_pool < 2:
 
-            raise ValueError('Size scale pool has less than two vertices.')
+            raise tspDraw.exception.VertexPoolTooSmall(self.n_pool,
+                                                       "Vertex pool is too small.") 
 
     def _make_random_pair(self):
         '''
