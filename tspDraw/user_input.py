@@ -83,8 +83,8 @@ def get_float(name):
         try:
             new_value = float(new_value)
             valid_input = True
-        except:
-            print("Invalid floating point number")
+        except ValueError:
+            print("Invalid floating point number!")
     return new_value
 
 def get_annealer_choice():
