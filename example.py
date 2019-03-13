@@ -25,14 +25,14 @@ def main():
     # Get the dithered image.
 
     ditheringMaker = tspDraw.dithering.DitheringMaker()
-    dithering = ditheringMaker.makeDithering(pixels)
+    dithering = ditheringMaker.make_dithering(pixels)
     plt.imshow(dithering, cmap = 'gray')
     plt.show()
 
     # Get the vertices from the dithered image and then
     # do the preprocessing.
     
-    vertices = tspDraw.dithering.getVertices(dithering)
+    vertices = tspDraw.dithering.get_vertices(dithering)
     print('Num vertices = ', len(vertices))
     print('Preprocessing Vertices')
     vertices = tspDraw.processVertices.preprocess(vertices)

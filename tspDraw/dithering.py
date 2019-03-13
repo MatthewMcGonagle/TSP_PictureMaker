@@ -1,3 +1,7 @@
+'''
+Perform dithering on image to turn it from grayscale into two-color image (black and white).
+'''
+
 import numpy as np
 
 ##########################
@@ -6,25 +10,26 @@ import numpy as np
 
 class DitheringMaker:
     '''
-    Performs dithering on an image using the classical Floyd-Steinberg dithering algorithm. The dithering isn't
-    applied to the last row or the edge columns. Instead the last row and edge columns are made all white as this 
-    will later not add any vertices when we extract vertices from the dithering.
+    Performs dithering on an image using the classical Floyd-Steinberg dithering algorithm. The
+    dithering isn't applied to the last row or the edge columns. Instead the last row and edge
+    columns are made all white as this will later not add any vertices when we extract vertices
+    from the dithering.
 
     Members
     -------
-    dithering : Numpy array of Int of Shape(nRows, nCol)
-        The array holding the dithering of the image. Note that the last row and edge columns will always
-        be converted to white (i.e. 255). 
+    dithering : Numpy array of Int of Shape(n_rows, nCol)
+        The array holding the dithering of the image. Note that the last row and edge columns will
+        always be converted to white (i.e. 255).
 
-    rowDisp : Numpy array of Int of shape (2, 3)
+    row_disp : Numpy array of Int of shape (2, 3)
         The row offsets to apply the diffusions to.
 
-    colDisp : Numpy array of Int of shape (2, 3)
+    col_disp : Numpy array of Int of shape (2, 3)
         The column offsets to apply the diffusions to.
 
-    diffusionProp : Numpy array of Float of shape (2, 3)
+    diffusion_prop : Numpy array of Float of shape (2, 3)
         The Floyd-Steinberg coefficients for diffusing the error in the
-        dithering. 
+        dithering.
     '''
 
     def __init__(self):
@@ -37,12 +42,12 @@ class DitheringMaker:
 
         self.dithering = None
 
-        self.rowDisp = np.full((2,3), np.arange(0, 2)[:, np.newaxis], dtype = 'int')
-        self.colDisp = np.full((2,3), np.arange(-1,2), dtype = 'int')
-        self.diffusionProp = np.array([[ 0, 0, 7],
-                                        [ 3, 5, 1]]) / 16
+        self.row_disp = np.full((2, 3), np.arange(0, 2)[:, np.newaxis], dtype = 'int')
+        self.col_disp = np.full((2, 3), np.arange(-1, 2), dtype = 'int')
+        self.diffusion_prop = np.array([[0, 0, 7],
+                                        [3, 5, 1]]) / 16
 
-    def makeDithering(self, pixels, cutoff = 255 / 2):
+    def make_dithering(self, pixels, cutoff = 255 / 2):
         '''
         Apply the classic Floyd-Steinberg dithering algorithm, but for simplicity
         we just make the edge columns and the last row all white (which will give
@@ -50,7 +55,7 @@ class DitheringMaker:
 
         Parameters
         ----------
-        pixels : Numpy array of Int of shape (nRows, nCols)
+        pixels : Numpy array of Int of shape (n_rows, n_cols)
             The gray scale pixels to apply the dithering to.
 
         cutoff : Float
@@ -58,7 +63,7 @@ class DitheringMaker:
 
         Returns
         -------
-        Numpy array of Int of Shape (nRows, nCols)
+        Numpy array of Int of Shape (n_rows, n_cols)
             The final dithering; each pixel is either 0 or 255 (black or white).
         '''
 
@@ -66,27 +71,27 @@ class DitheringMaker:
         # _     x     7/16
         # 3/16  5/16  1/16
 
-        self.dithering = pixels.copy().astype('float') 
+        self.dithering = pixels.copy().astype('float')
 
-        nRows, nCols = pixels.shape
+        n_rows, n_cols = pixels.shape
 
         # Initialize the first column to be white.
 
-        self.dithering[:][0] = 255 
+        self.dithering[:][0] = 255
 
-        # Iterate over each row, applying the dithering and diffusing the error. 
+        # Iterate over each row, applying the dithering and diffusing the error.
 
-        for row in range(nRows - 1):
-            for col in range(1, nCols - 1):
-                
-                dither, error = self.getDither(row, col, cutoff)
+        for row in range(n_rows - 1):
+            for col in range(1, n_cols - 1):
+
+                dither, error = self.get_dither(row, col, cutoff)
                 self.dithering[row, col] = dither
-                self.diffuseError(error, row, col)
+                self.diffuse_error(error, row, col)
 
         # Make the last column and the last row all white.
 
-        self.dithering[:, -1] = 255 
-        self.dithering[-1, :] = 255 
+        self.dithering[:, -1] = 255
+        self.dithering[-1, :] = 255
 
 
         # Convert dithering to Numpy array of Int.
@@ -95,7 +100,7 @@ class DitheringMaker:
 
         return self.dithering
 
-    def getDither(self, row, col, cutoff):
+    def get_dither(self, row, col, cutoff):
         '''
         Turn (dithered) pixel into either 0 or 255 using cutoff.
 
@@ -106,9 +111,10 @@ class DitheringMaker:
 
         col : Int
             Index of pixel column.
-    
+
         cutoff : Float
-            The cutoff value to use for converting dithering value to either 0 or 255 (black or white).
+            The cutoff value to use for converting dithering value to either 0 or 255
+            (black or white).
 
         Returns
         -------
@@ -117,21 +123,21 @@ class DitheringMaker:
 
         error : Float
             The error in applying the conversion, this needs to be diffused to other pixels
-            according to the dithering algorithm. 
+            according to the dithering algorithm.
         '''
 
         pixel = self.dithering[row][col]
 
-        if pixel < cutoff: 
+        if pixel < cutoff:
             dither = 0.0
         else:
             dither = 255.0
 
-        error = pixel - dither 
+        error = pixel - dither
 
-        return dither, error 
+        return dither, error
 
-    def diffuseError(self, error, row, col):
+    def diffuse_error(self, error, row, col):
         '''
         Diffuse the error from a (dithered) pixel conversion to black or white. The diffusion
         is applied to the neighbors of the pixel at position [row, col] according to the
@@ -148,17 +154,17 @@ class DitheringMaker:
         col : Int
             The column index of where the conversion took place.
         '''
-        
-        self.dithering[row + self.rowDisp, col + self.colDisp] += error * self.diffusionProp
 
-def getVertices(dithering):
+        self.dithering[row + self.row_disp, col + self.col_disp] += error * self.diffusion_prop
+
+def get_vertices(dithering):
     '''
-    Get the vertices from a black and white image, not grayscale (in particular a dithered image). 
+    Get the vertices from a black and white image, not grayscale (in particular a dithered image).
     Every black pixel (value 0.0) gives a vertex.
 
     Parameters
     ----------
-    dithering : Numpy array of shape (nRows, nCols)
+    dithering : Numpy array of shape (n_rows, n_cols)
         The array of pixels for the dithered image.
 
     Returns
@@ -167,24 +173,22 @@ def getVertices(dithering):
         The xy-coordinates of the vertices.
     '''
 
-    nRows, nCols = dithering.shape
+    n_rows, n_cols = dithering.shape
 
     # Each black pixel gives a vertex.
-    keepPixelMask = (dithering == 0)
+    keep_pixel_mask = (dithering == 0)
 
     # Get the row and column indices of the vertices.
 
-    rows = np.full(dithering.shape, np.arange(nRows)[:, np.newaxis]).reshape(-1)
-    cols = np.full(dithering.shape, np.arange(nCols)).reshape(-1)
+    rows = np.full(dithering.shape, np.arange(n_rows)[:, np.newaxis]).reshape(-1)
+    cols = np.full(dithering.shape, np.arange(n_cols)).reshape(-1)
 
-    rows = rows[keepPixelMask.reshape(-1)]
-    cols = cols[keepPixelMask.reshape(-1)]
+    rows = rows[keep_pixel_mask.reshape(-1)]
+    cols = cols[keep_pixel_mask.reshape(-1)]
 
     # Get the xy-coordinate of the vertices. Make sure to transform row index so
     # that the last row has y value 0.
 
-    vertices = np.stack([cols, nRows - rows], axis = -1)
+    vertices = np.stack([cols, n_rows - rows], axis = -1)
 
     return vertices
-
-

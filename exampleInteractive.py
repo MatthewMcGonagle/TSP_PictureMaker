@@ -26,8 +26,8 @@ plt.show()
 # Get the dithered image and its vertices.
 
 ditheringMaker = tspDraw.dithering.DitheringMaker()
-dithering = ditheringMaker.makeDithering(pixels)
-vertices = tspDraw.dithering.getVertices(dithering)
+dithering = ditheringMaker.make_dithering(pixels)
+vertices = tspDraw.dithering.get_vertices(dithering)
 
 print("Number Vertices = ", len(vertices))
 plt.imshow(dithering, cmap = 'gray')
