@@ -72,7 +72,7 @@ def main():
     tspDraw.graphics.savePNG('docs\\greedyGuess.png')
     plt.show()
     
-    energies = tspDraw.jobs.doAnnealing(annealingSteps, nJobs)
+    energies = tspDraw.jobs.do_annealing(annealingSteps, nJobs)
  
     print('Finished running annealing jobs') 
     
@@ -121,7 +121,7 @@ def main():
     
     # Now run the annealing steps for the vonNeumann.png example.
    
-    energies = tspDraw.jobs.doAnnealing(annealingSteps, nJobs) 
+    energies = tspDraw.jobs.do_annealing(annealingSteps, nJobs) 
     print('Finished running annealing jobs') 
     
     # Plot the energies of the annealing process over time.
