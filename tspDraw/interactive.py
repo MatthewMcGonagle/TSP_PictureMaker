@@ -106,6 +106,7 @@ class Session:
             self.state.doing_jobs = False
 
         elif command == "graph result":
+            print("\nClose Graph Window to return to the menu.\n")
             self._graph_cycle()
             self.state.doing_jobs = False
 
@@ -121,10 +122,10 @@ class Session:
         try:
             self.annealer.do_warm_restart()
         except tspDraw.exception.VertexPoolTooSmall as inst:
-            message = ( "**************\n" +
-                        inst.message +
-                        "\nTry lowering the size scale." +
-                        "\n***************")
+            message = ("**************\n" +
+                       inst.message +
+                       "\nTry lowering the size scale." +
+                       "\n***************")
             print(message)
             self.state.doing_jobs = False
 
