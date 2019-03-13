@@ -61,12 +61,12 @@ def main():
     
     # Set up our annealing steps iterator.
     
-    annealingSteps = tspDraw.sizeScale.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
-    print('Initial Configuration:\n', annealingSteps.getInfoString())
+    annealingSteps = tspDraw.size_scale.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
+    print('Initial Configuration:\n', annealingSteps.get_info_string())
     
     # Plot the intial cycle.
     
-    cycle = annealingSteps.getCycle()
+    cycle = annealingSteps.get_cycle()
     tspDraw.graphics.plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
     tspDraw.graphics.savePNG('docs\\greedyGuess.png')
@@ -85,7 +85,7 @@ def main():
     
     # Plot the final cycle of the annealing process.
     
-    cycle = annealingSteps.getCycle()
+    cycle = annealingSteps.get_cycle()
     tspDraw.graphics.plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
     tspDraw.graphics.savePNG('docs\\afterSizeAnnealing.png')
@@ -117,7 +117,7 @@ def main():
     # Set up our annealing steps iterator.
     
     annealingSteps = tspDraw.neighbors.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
-    print('Initial Configuration:\n', annealingSteps.getInfoString())
+    print('Initial Configuration:\n', annealingSteps.get_info_string())
     
     # Now run the annealing steps for the vonNeumann.png example.
    
@@ -133,7 +133,7 @@ def main():
     
     # Plot the final cycle of the annealing process.
     
-    cycle = annealingSteps.getCycle()
+    cycle = annealingSteps.get_cycle()
     tspDraw.graphics.plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
     plt.tight_layout()
     tspDraw.graphics.savePNG('docs\\finalCycle.png')
