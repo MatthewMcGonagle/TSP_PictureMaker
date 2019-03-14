@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-import tspDraw
+import tsp_draw
 
 ###########################
 #### Main executable
@@ -18,13 +18,13 @@ def main():
     # Open the image.
 
     image = Image.open('tigerHeadResize.png').convert('L')
-    pixels = tspDraw.graphics.getPixels(image, ds = 1)
+    pixels = tsp_draw.graphics.getPixels(image, ds = 1)
     plt.imshow(pixels, cmap = 'gray')
     plt.show()
 
     # Get the dithered image.
 
-    ditheringMaker = tspDraw.dithering.DitheringMaker()
+    ditheringMaker = tsp_draw.dithering.DitheringMaker()
     dithering = ditheringMaker.make_dithering(pixels)
     plt.imshow(dithering, cmap = 'gray')
     plt.show()
@@ -32,10 +32,10 @@ def main():
     # Get the vertices from the dithered image and then
     # do the preprocessing.
     
-    vertices = tspDraw.dithering.get_vertices(dithering)
+    vertices = tsp_draw.dithering.get_vertices(dithering)
     print('Num vertices = ', len(vertices))
     print('Preprocessing Vertices')
-    vertices = tspDraw.processVertices.preprocess(vertices)
+    vertices = tsp_draw.process_vertices.preprocess(vertices)
     print('Preprocessing Complete')
     plt.scatter(vertices[:, 0], vertices[:, 1])
     plt.show()
@@ -61,34 +61,34 @@ def main():
     
     # Set up our annealing steps iterator.
     
-    annealingSteps = tspDraw.size_scale.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
+    annealingSteps = tsp_draw.size_scale.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initScale, sizeCooling)
     print('Initial Configuration:\n', annealingSteps.get_info_string())
     
     # Plot the intial cycle.
     
     cycle = annealingSteps.get_cycle()
-    tspDraw.graphics.plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
+    tsp_draw.graphics.plotCycle(cycle, 'Greedy Guess Path', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
-    tspDraw.graphics.savePNG('docs\\greedyGuess.png')
+    tsp_draw.graphics.savePNG('docs\\greedyGuess.png')
     plt.show()
     
-    energies = tspDraw.jobs.do_annealing(annealingSteps, nJobs)
+    energies = tsp_draw.jobs.do_annealing(annealingSteps, nJobs)
  
     print('Finished running annealing jobs') 
     
     # Plot the energies of the annealing process over time.
     
-    tspDraw.graphics.plotEnergies(energies, 'Energies for Size Scale Annealing')
+    tsp_draw.graphics.plotEnergies(energies, 'Energies for Size Scale Annealing')
     # If you wish to save a copy of the graph, then use the following line:
-    # tspDraw.graphics.savePNG('docs\\sizeScaleEnergies.png')
+    # tsp_draw.graphics.savePNG('docs\\sizeScaleEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.get_cycle()
-    tspDraw.graphics.plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
+    tsp_draw.graphics.plotCycle(cycle, 'Final Path for Size Scale Annealing', doScatter = False, figsize = cycleFigSize)
     plt.tight_layout()
-    tspDraw.graphics.savePNG('docs\\afterSizeAnnealing.png')
+    tsp_draw.graphics.savePNG('docs\\afterSizeAnnealing.png')
     plt.show()   
 
     vertices = cycle[:-1]
@@ -116,27 +116,27 @@ def main():
     
     # Set up our annealing steps iterator.
     
-    annealingSteps = tspDraw.neighbors.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
+    annealingSteps = tsp_draw.neighbors.Annealer(nSteps / nJobs, vertices, initTemp, cooling, initNbrs, nbrsCooling)
     print('Initial Configuration:\n', annealingSteps.get_info_string())
     
     # Now run the annealing steps for the vonNeumann.png example.
    
-    energies = tspDraw.jobs.do_annealing(annealingSteps, nJobs) 
+    energies = tsp_draw.jobs.do_annealing(annealingSteps, nJobs) 
     print('Finished running annealing jobs') 
     
     # Plot the energies of the annealing process over time.
     
-    tspDraw.graphics.plotEnergies(energies, 'Energies for Neighbors Annealing')
+    tsp_draw.graphics.plotEnergies(energies, 'Energies for Neighbors Annealing')
     # If you wish to save a copy of this graph, then use the following line:
-    # tspDraw.graphics.savePNG('docs\\nbrsEnergies.png')
+    # tsp_draw.graphics.savePNG('docs\\nbrsEnergies.png')
     plt.show()
     
     # Plot the final cycle of the annealing process.
     
     cycle = annealingSteps.get_cycle()
-    tspDraw.graphics.plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
+    tsp_draw.graphics.plotCycle(cycle, 'Final Path for Neighbors Annealing', doScatter = False, figsize = finalFigSize)
     plt.tight_layout()
-    tspDraw.graphics.savePNG('docs\\finalCycle.png')
+    tsp_draw.graphics.savePNG('docs\\finalCycle.png')
     plt.show()   
 
 ##########################

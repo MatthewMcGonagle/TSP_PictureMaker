@@ -4,13 +4,13 @@ from a number of the first's nearest neighbors.
 '''
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-import tspDraw.base
+import tsp_draw.base
 
 ##########################################
 #### NeighborsAnnealer
 ##########################################
 
-class Annealer(tspDraw.base.Annealer):
+class Annealer(tsp_draw.base.Annealer):
     '''
     Modified simulated annealer that randomly selects a vertex and then randomly selects another
     vertex from the k-nearest neighbors of the first vertex. The point of this annealer is to do
@@ -19,7 +19,7 @@ class Annealer(tspDraw.base.Annealer):
 
     Members
     -------
-    Members inherited from tspDraw.base.Annealer
+    Members inherited from tsp_draw.base.Annealer
 
     k_nbrs : Float
         The number of neighbors to randomly select from. This is converted to an int when doing
@@ -74,7 +74,7 @@ class Annealer(tspDraw.base.Annealer):
             is applied to k_nbrs via multiplication. Note that k_nbrs is a float as well.
         '''
 
-        tspDraw.base.Annealer.__init__(self, nSteps, vertices, temperature, temp_cool)
+        tsp_draw.base.Annealer.__init__(self, nSteps, vertices, temperature, temp_cool)
 
         self.k_nbrs = k_nbrs
         self.nbrs_cool = nbrs_cool
@@ -88,7 +88,7 @@ class Annealer(tspDraw.base.Annealer):
         self._current_to_orig = np.arange(self.n_vertices)
 
     def _update_state(self):
-        tspDraw.base.Annealer._update_state(self)
+        tsp_draw.base.Annealer._update_state(self)
         self.k_nbrs *= self.nbrs_cool
 
     def _make_random_pair(self):
@@ -173,7 +173,7 @@ class Annealer(tspDraw.base.Annealer):
             Contains information on the energy, k_nbrs, and the temperature.
         '''
 
-        info = tspDraw.base.Annealer.get_info_string(self)
+        info = tsp_draw.base.Annealer.get_info_string(self)
         info += '\tk_nbrs = ' + str(self.k_nbrs)
 
         return info

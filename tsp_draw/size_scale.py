@@ -8,8 +8,8 @@ Also has functions for guessing correct initial settings of the annealer.
 '''
 
 import numpy as np
-import tspDraw.base
-import tspDraw.exception
+import tsp_draw.base
+import tsp_draw.exception
 
 def _guess_temperature_settings(n_jobs, n_steps_per_job, segment_length):
     '''
@@ -112,7 +112,7 @@ def guess_settings(vertices, n_steps_per_job, n_jobs = 10):
 
     return settings
 
-class Annealer(tspDraw.base.Annealer):
+class Annealer(tsp_draw.base.Annealer):
     '''
     An iterator for performing annealing based on a size scale. The annealing is done on a pool of
     vertices that are on an edge of the cycle that is at least as long as the current size scale;
@@ -123,7 +123,7 @@ class Annealer(tspDraw.base.Annealer):
 
     Members
     -------
-    Members Inherited from tspDraw.base.Annealer
+    Members Inherited from tsp_draw.base.Annealer
 
     size_scale : Float
         The current size scale. Used when setting up the pool of vertices between jobs.
@@ -167,7 +167,7 @@ class Annealer(tspDraw.base.Annealer):
             The rate (or decay) of the size scale. The size cooling is applied via multiplication
             by size_cool.
         '''
-        tspDraw.base.Annealer.__init__(self, n_steps, vertices, temperature, temp_cool)
+        tsp_draw.base.Annealer.__init__(self, n_steps, vertices, temperature, temp_cool)
         self.size_scale = size_scale
         self.size_cool = size_cool
 
@@ -181,11 +181,11 @@ class Annealer(tspDraw.base.Annealer):
         '''
         Do a warm restart of the iterator. This also updates the size scale vertex pool.
         '''
-        tspDraw.base.Annealer.do_warm_restart(self)
+        tsp_draw.base.Annealer.do_warm_restart(self)
         self._find_scale_pool()
 
     def _update_state(self):
-        tspDraw.base.Annealer._update_state(self)
+        tsp_draw.base.Annealer._update_state(self)
         self.size_scale *= self.size_cool
 
     def _find_scale_pool(self):
@@ -221,7 +221,7 @@ class Annealer(tspDraw.base.Annealer):
 
         if self.n_pool < 2:
 
-            raise tspDraw.exception.VertexPoolTooSmall(self.n_pool,
+            raise tsp_draw.exception.VertexPoolTooSmall(self.n_pool,
                                                        "Vertex pool is too small.") 
 
     def _make_random_pair(self):
@@ -293,7 +293,7 @@ class Annealer(tspDraw.base.Annealer):
             temperature.
         '''
 
-        info = tspDraw.base.Annealer.get_info_string(self)
+        info = tsp_draw.base.Annealer.get_info_string(self)
         info += '\tsize_scale = ' + str(self.size_scale)
         info += '\tn_pool = ' + str(self.n_pool)
         return info

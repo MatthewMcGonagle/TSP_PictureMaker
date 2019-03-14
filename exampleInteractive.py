@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-import tspDraw
+import tsp_draw
 
 myInputFileName = 'tigerHeadResize.png'
 
@@ -19,15 +19,15 @@ finalFigSize = (10, 10)
 # Open the image.
 
 image = Image.open(myInputFileName).convert('L')
-pixels = tspDraw.graphics.getPixels(image, ds = 1)
+pixels = tsp_draw.graphics.getPixels(image, ds = 1)
 plt.imshow(pixels, cmap = 'gray')
 plt.show()
 
 # Get the dithered image and its vertices.
 
-ditheringMaker = tspDraw.dithering.DitheringMaker()
+ditheringMaker = tsp_draw.dithering.DitheringMaker()
 dithering = ditheringMaker.make_dithering(pixels)
-vertices = tspDraw.dithering.get_vertices(dithering)
+vertices = tsp_draw.dithering.get_vertices(dithering)
 
 print("Number Vertices = ", len(vertices))
 plt.imshow(dithering, cmap = 'gray')
@@ -35,8 +35,8 @@ plt.show()
 
 # Do the preprocessing of the vertices.
 
-vertices = tspDraw.processVertices.preprocess(vertices)
+vertices = tsp_draw.process_vertices.preprocess(vertices)
 print('Preprocessing Complete')
 
-session = tspDraw.interactive.Session(vertices)
+session = tsp_draw.interactive.Session(vertices)
 session.run()

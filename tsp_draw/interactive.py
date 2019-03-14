@@ -6,10 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import keyboard
 
-import tspDraw.size_scale
-import tspDraw.neighbors
-import tspDraw.size_neighbors
-import tspDraw.user_input
+import tsp_draw.size_scale
+import tsp_draw.neighbors
+import tsp_draw.size_neighbors
+import tsp_draw.user_input
 
 class SessionState:
     '''
@@ -49,11 +49,11 @@ class Session:
 
         if settings is None:
 
-            settings = tspDraw.size_scale.guess_settings(vertices, n_steps_per_job,
+            settings = tsp_draw.size_scale.guess_settings(vertices, n_steps_per_job,
                                                          n_jobs_between_inquiry * 10)
             settings['size_cool'] = 1.0
 
-        self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job, self.vertices, **settings)
+        self.annealer = tsp_draw.size_scale.Annealer(self.n_steps_per_job, self.vertices, **settings)
 
         self.energies = np.zeros(n_jobs_between_inquiry * 10)
 
@@ -71,7 +71,7 @@ class Session:
             print("Press m for menu")
             if keyboard.is_pressed('m') or not self.state.doing_jobs:
                 #command = self._getNextCommand()
-                command = tspDraw.user_input.get_main_menu_choice()
+                command = tsp_draw.user_input.get_main_menu_choice()
                 self._process_command(command)
                 #self._setState()
 
@@ -94,7 +94,7 @@ class Session:
             self.state.printing_stats = True
 
         elif command == "change temperature":
-            self.annealer.temperature = tspDraw.user_input.get_float("Temperature")
+            self.annealer.temperature = tsp_draw.user_input.get_float("Temperature")
             self.state.doing_jobs = False
 
         elif command == "change scale":
@@ -112,16 +112,16 @@ class Session:
 
     def _change_scale(self):
 
-        if isinstance(self.annealer, tspDraw.neighbors.Annealer):
+        if isinstance(self.annealer, tsp_draw.neighbors.Annealer):
             print("ANNEALER DOESN'T HAVE SIZE SCALE")
             self.state.doing_jobs = False
             return
 
-        self.annealer.size_scale = tspDraw.user_input.get_float("Size Scale")
+        self.annealer.size_scale = tsp_draw.user_input.get_float("Size Scale")
 
         try:
             self.annealer.do_warm_restart()
-        except tspDraw.exception.VertexPoolTooSmall as inst:
+        except tsp_draw.exception.VertexPoolTooSmall as inst:
             message = ("**************\n" +
                        inst.message +
                        "\nTry lowering the size scale." +
@@ -139,9 +139,9 @@ class Session:
 
     def _change_annealer(self):
 
-        new_annealer = tspDraw.user_input.get_annealer_choice()
+        new_annealer = tsp_draw.user_input.get_annealer_choice()
 
-        #if type(self.annealer) is tspDraw.size_scale.Annealer:
+        #if type(self.annealer) is tsp_draw.size_scale.Annealer:
         print("Changing to ", new_annealer)
         settings = {'temperature' : self.annealer.temperature,
                     'temp_cool' : self.annealer.temp_cool
@@ -152,24 +152,24 @@ class Session:
             settings.update({'k_nbrs' : 30,
                              'nbrs_cool' : 1
                             })
-            self.annealer = tspDraw.neighbors.Annealer(self.n_steps_per_job, self.vertices,
+            self.annealer = tsp_draw.neighbors.Annealer(self.n_steps_per_job, self.vertices,
                                                        **settings)
 
         elif new_annealer == "size_scale":
-            settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
+            settings.update(tsp_draw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
                                                               self.n_jobs_between_inquiry * 10))
             settings['size_cool'] = 1.0
-            self.annealer = tspDraw.size_scale.Annealer(self.n_steps_per_job,
+            self.annealer = tsp_draw.size_scale.Annealer(self.n_steps_per_job,
                                                         self.vertices, **settings)
 
         elif new_annealer == "size_neighbors":
-            settings.update(tspDraw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
+            settings.update(tsp_draw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
                                                               self.n_jobs_between_inquiry * 10))
             settings['size_cool'] = 1.0
             settings.update({'k_nbrs' : 30,
                              'nbrs_cool' : 1
                             })
-            self.annealer = tspDraw.size_neighbors.Annealer(self.n_steps_per_job,
+            self.annealer = tsp_draw.size_neighbors.Annealer(self.n_steps_per_job,
                                                             self.vertices, **settings)
 
     def _run_state(self):
@@ -179,7 +179,7 @@ class Session:
             new_energies = []
             try:
                 self.annealer.do_warm_restart()
-            except tspDraw.exception.VertexPoolTooSmall as inst:
+            except tsp_draw.exception.VertexPoolTooSmall as inst:
                 message = ("**************\n" +
                            inst.message +
                            "\nTry lowering the size scale." +

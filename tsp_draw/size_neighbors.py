@@ -4,9 +4,9 @@ then selects a random neighbor of random vertex from the candidate pool.
 '''
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-import tspDraw.size_scale
+import tsp_draw.size_scale
 
-class Annealer(tspDraw.size_scale.Annealer):
+class Annealer(tsp_draw.size_scale.Annealer):
     '''
     Annealer that uses a candidate pool of vertices that is based on a certain size scale,
     then selects a random neighbor of random vertex from the candidate pool.
@@ -15,7 +15,7 @@ class Annealer(tspDraw.size_scale.Annealer):
     def __init__(self, nSteps, vertices, temperature, temp_cool, size_scale,
                  size_cool, k_nbrs, nbrs_cool):
 
-        tspDraw.size_scale.Annealer.__init__(self, nSteps, vertices, temperature,
+        tsp_draw.size_scale.Annealer.__init__(self, nSteps, vertices, temperature,
                                              temp_cool, size_scale, size_cool)
         self.k_nbrs = k_nbrs
         self.nbrs_cool = nbrs_cool
@@ -30,9 +30,9 @@ class Annealer(tspDraw.size_scale.Annealer):
     def _update_state(self):
         '''
         Cool the neighbors number and update the state inherited from
-        tspDraw.size_scale.Annealer.
+        tsp_draw.size_scale.Annealer.
         '''
-        tspDraw.size_scale.Annealer._update_state(self)
+        tsp_draw.size_scale.Annealer._update_state(self)
         self.k_nbrs *= self.nbrs_cool
 
     def _make_random_pair(self):
@@ -120,7 +120,7 @@ class Annealer(tspDraw.size_scale.Annealer):
             Contains information on the energy, k_nbrs, and the temperature.
         '''
 
-        info = tspDraw.size_scale.Annealer.get_info_string(self)
+        info = tsp_draw.size_scale.Annealer.get_info_string(self)
         info += '\tk_nbrs = ' + str(self.k_nbrs)
 
         return info
