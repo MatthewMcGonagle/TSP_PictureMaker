@@ -36,6 +36,9 @@ class Annealer:
     n_vertices : Int
         The number of vertices in the cycle.
     '''
+
+    _float_formatter = '{:.5e}'
+
     def __init__(self, n_steps, vertices, temperature, temp_cool):
 
         # Members from Parameters
@@ -113,8 +116,8 @@ class Annealer:
         '''
 
         energy = self.get_energy()
-        info = 'Energy = ' + str(energy)
-        info += '\tTemperature = ' + str(self.temperature)
+        info = 'Energy = ' + Annealer._float_formatter.format(energy)
+        info += '\tTemperature = ' + Annealer._float_formatter.format(self.temperature)
 
         return info
 

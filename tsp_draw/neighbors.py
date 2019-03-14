@@ -174,6 +174,6 @@ class Annealer(tsp_draw.base.Annealer):
         '''
 
         info = tsp_draw.base.Annealer.get_info_string(self)
-        info += '\tk_nbrs = ' + str(self.k_nbrs)
+        info += '\tk_nbrs = ' + Annealer._float_formatter.format(self.k_nbrs)
 
         return info

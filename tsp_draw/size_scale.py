@@ -222,7 +222,7 @@ class Annealer(tsp_draw.base.Annealer):
         if self.n_pool < 2:
 
             raise tsp_draw.exception.VertexPoolTooSmall(self.n_pool,
-                                                       "Vertex pool is too small.") 
+                                                        "Vertex pool is too small.")
 
     def _make_random_pair(self):
         '''
@@ -294,6 +294,6 @@ class Annealer(tsp_draw.base.Annealer):
         '''
 
         info = tsp_draw.base.Annealer.get_info_string(self)
-        info += '\tsize_scale = ' + str(self.size_scale)
+        info += '\tsize_scale = ' + Annealer._float_formatter.format(self.size_scale)
         info += '\tn_pool = ' + str(self.n_pool)
         return info

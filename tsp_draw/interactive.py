@@ -50,12 +50,13 @@ class Session:
         if settings is None:
 
             settings = tsp_draw.size_scale.guess_settings(vertices, n_steps_per_job,
-                                                         n_jobs_between_inquiry * 10)
+                                                          n_jobs_between_inquiry * 10)
             settings['size_cool'] = 1.0
 
-        self.annealer = tsp_draw.size_scale.Annealer(self.n_steps_per_job, self.vertices, **settings)
+        self.annealer = tsp_draw.size_scale.Annealer(self.n_steps_per_job, self.vertices,
+                                                     **settings)
 
-        self.energies = np.zeros(n_jobs_between_inquiry * 10)
+        self.energies = np.full(n_jobs_between_inquiry * 10, self.annealer.get_energy())
 
     def run(self):
         '''
@@ -153,24 +154,24 @@ class Session:
                              'nbrs_cool' : 1
                             })
             self.annealer = tsp_draw.neighbors.Annealer(self.n_steps_per_job, self.vertices,
-                                                       **settings)
+                                                        **settings)
 
         elif new_annealer == "size_scale":
             settings.update(tsp_draw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
-                                                              self.n_jobs_between_inquiry * 10))
+                                                               self.n_jobs_between_inquiry * 10))
             settings['size_cool'] = 1.0
             self.annealer = tsp_draw.size_scale.Annealer(self.n_steps_per_job,
-                                                        self.vertices, **settings)
+                                                         self.vertices, **settings)
 
         elif new_annealer == "size_neighbors":
             settings.update(tsp_draw.size_scale.guess_settings(self.vertices, self.n_steps_per_job,
-                                                              self.n_jobs_between_inquiry * 10))
+                                                               self.n_jobs_between_inquiry * 10))
             settings['size_cool'] = 1.0
             settings.update({'k_nbrs' : 30,
                              'nbrs_cool' : 1
                             })
             self.annealer = tsp_draw.size_neighbors.Annealer(self.n_steps_per_job,
-                                                            self.vertices, **settings)
+                                                             self.vertices, **settings)
 
     def _run_state(self):
 
@@ -196,8 +197,9 @@ class Session:
             self._append_energies(new_energies)
 
         if self.state.printing_stats:
-
-            print("\n", self.annealer.get_info_string())
+            energy_change = '{:3.4f}'.format(self.energies[-1] - self.energies[0])
+            print("\n", self.annealer.get_info_string(),
+                  "\tEnergy Change = ", energy_change)
 
         if self.state.graphing_energies:
 
