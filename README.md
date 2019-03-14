@@ -26,7 +26,7 @@ An example of using the functions to convert tigerHeadResize.png into a TSP pict
 
 # Package Description 
 
-The name of the package is `tspDraw`. It contains the following modules:
+The name of the package is `tsp_draw`. It contains the following modules:
 
 ## dithering
 

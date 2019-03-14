@@ -3,7 +3,7 @@ layout: default
 title: TSP_PictureMaker 
 ---
 
-For help using `tspDraw`, please see the [Interactive Session Tutorial](tutorial.html).
+For help using `tsp_draw`, please see the [Interactive Session Tutorial](tutorial.html).
 
 # What  is TSP_PictureMaker?
 
@@ -20,7 +20,7 @@ was made from the following original picture:
 # Using `TSP_PictureMaker` 
 
 The easiest way to use `TSP_PictureMaker` is to use it as an interactive session. The API for the
-interactive session is `tspDraw.interactive.py`. An example of how to use the interactive session 
+interactive session is `tsp_draw.interactive.py`. An example of how to use the interactive session 
 is provided by `exampleInteractive.py` in the project root directory. For help understanding how to
 use this, please see:
 
