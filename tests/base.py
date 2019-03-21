@@ -5,7 +5,7 @@ import fake_random
 sys.path.append('..')
 import tsp_draw.base
 
-class TestBaseMethods(unittest.TestCase):
+class TestAnnealerMethods(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -48,6 +48,12 @@ class TestBaseMethods(unittest.TestCase):
         test_trials = [annealer._run_proposal_trial(energy_diff) for _ in uniform_results] 
         true_trials = [prob < critical_val for prob in uniform_results] 
         self.assertEqual(test_trials, true_trials)
+
+    def test_do_warm_restart(self):
+        annealer = tsp_draw.base.Annealer(**self.params)
+        annealer.steps_processed = 5
+        annealer.do_warm_restart()
+        self.assertEqual(annealer.steps_processed, 0)
 
 if __name__ == '__main__':
     unittest.main()
