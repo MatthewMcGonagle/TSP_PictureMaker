@@ -140,7 +140,8 @@ class Annealer(tsp_draw.base.Annealer):
         The number of vertices in the pool.
     '''
 
-    def __init__(self, n_steps, vertices, temperature, temp_cool, size_scale, size_cool):
+    def __init__(self, n_steps, vertices, temperature, temp_cool, size_scale, size_cool,
+                 rand_state = np.random.RandomState()):
         '''
         Set up the total number of steps that the iterator will take as well as the cooling.
 
@@ -167,7 +168,7 @@ class Annealer(tsp_draw.base.Annealer):
             The rate (or decay) of the size scale. The size cooling is applied via multiplication
             by size_cool.
         '''
-        tsp_draw.base.Annealer.__init__(self, n_steps, vertices, temperature, temp_cool)
+        tsp_draw.base.Annealer.__init__(self, n_steps, vertices, temperature, temp_cool, rand_state)
         self.size_scale = size_scale
         self.size_cool = size_cool
 
@@ -240,8 +241,8 @@ class Annealer(tsp_draw.base.Annealer):
         same_num = True
 
         while same_num:
-            begin = np.random.randint(self.n_pool)
-            end = np.random.randint(self.n_pool)
+            begin = self.random_state.randint(self.n_pool)
+            end = self.random_state.randint(self.n_pool)
 
             begin = self.pool_v[begin]
             end = self.pool_v[end]

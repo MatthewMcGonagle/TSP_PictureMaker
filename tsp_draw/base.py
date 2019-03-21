@@ -39,7 +39,7 @@ class Annealer:
 
     _float_formatter = '{:.5e}'
 
-    def __init__(self, n_steps, vertices, temperature, temp_cool):
+    def __init__(self, n_steps, vertices, temperature, temp_cool, rand_state = np.random.RandomState()):
 
         # Members from Parameters
 
@@ -47,6 +47,7 @@ class Annealer:
         self.vertices = vertices
         self.temperature = temperature
         self.temp_cool = temp_cool
+        self.random_state = rand_state
 
         self.steps_processed = 0
         self.n_vertices = len(vertices)
@@ -184,7 +185,7 @@ class Annealer:
 
         prob = np.exp(-energy_diff / self.temperature)
 
-        trial = np.random.uniform()
+        trial = self.random_state.uniform()
 
         return trial < prob
 
